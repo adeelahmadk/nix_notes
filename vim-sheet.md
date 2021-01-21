@@ -108,6 +108,43 @@ Some useful commands from the default configuration are as follows:
 
 
 
+## Custom Commands
+
+
+
+### Line numbering
+
+Vim/Neovim gives four possible states for line numbering:
+
+- no numbers
+- absolute line numbers
+- relative line numbers (zero on current  line).
+- relative line numbers with absolute number on current  line.
+
+Toggle all four settings, **no numbers** → **absolute** → **relative** → **relative with absolute on cursor line**:
+
+```
+:exe 'set nu!' &nu ? 'rnu!' : ''
+```
+
+Toggle between no **numbers** → **absolute** → **relative**:
+```
+:let [&nu, &rnu] = [&nu+&rnu==0, &nu]
+```
+
+Toggle between **no numbers** → **absolute** → **relative with absolute on cursor line**:
+```
+:let [&nu, &rnu] = [!&rnu, &nu+&rnu==1]
+```
+
+To map one of these commands to a key combination:
+
+```
+nnoremap <silent> <F6> :let [&nu, &rnu] = [!&rnu, &nu+&rnu==1]<CR>
+```
+
+
+
 ## Plug-ins
 
 Vim functionality can be immensely improved by adding plug-ins. A list of some useful plug-ins, that turn Vim into an IDE, are as follows:

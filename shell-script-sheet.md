@@ -6,6 +6,101 @@
 
 
 
+### Special Parameters
+
+For detailed description refer to the [shell parameters]([Shell Parameters](https://www.gnu.org/software/bash/manual/html_node/Shell-Parameters.html) ) section in [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html#SEC_Contents).
+
+| Parameter | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| *         | ($*) Expands to the positional parameters, starting from one. When the expansion occurs within double quotes, it expands to a single word with the value of each parameter separated by the first character of the `IFS` special variable. |
+| @         | ($@) Expands to the positional parameters, starting from one. When the expansion occurs within double quotes, and word splitting is performed, each parameter expands to a separate word. |
+| #         | ($#) Expands to the number of positional parameters in decimal. |
+| ?         | ($?) Expands to the exit status of the most recently executed foreground pipeline. |
+| -         | ($-, a hyphen.) Expands to the current option flags as specified upon invocation, by the `set` builtin command, or those set by the shell itself |
+| $         | ($$) Expands to the process ID of the shell. In a `()` subshell, it expands to the process ID of the invoking shell, not the subshell. |
+| !         | ($!) Expands to the process ID of the job most recently placed into the background, whether executed as an asynchronous command or using the `bg` builtin |
+| 0         | ($0) Expands to the name of the shell or shell script.       |
+
+
+
+### `sh` ( `dash` ) Arguments
+
+Shell can be launched with number of arguments.
+
+| Option           | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `-a allexport`   | Export all variables assigned to.                            |
+| `-c`             | Read commands from the command_string operand instead of from the standard input. |
+| `-C noclobber`   | Don't overwrite existing files with “>”.                     |
+| `-e errexit`     | If not interactive, exit immediately if any untested command fails. |
+| `-f noglob`      | Disable pathname expansion.                                  |
+| `-n noexec`      | If not interactive, read commands but do not execute them.  This is useful for checking the syntax of shell scripts. |
+| `-u nounset`     | Write a message to standard error when attempting to expand a variable that is not set, and if the shell is not interactive, exit immediately. |
+| `-v verbose`     | The shell writes its input to standard error as it is read.  Useful for debugging. |
+| `-x xtrace`      | Write each command to standard error (preceded by a ‘+ ’) before it is executed.  Useful for debugging. |
+| `-I ignoreeof`   | Ignore EOF's from input when interactive.                    |
+| `-i interactive` | Force the shell to behave interactively.                     |
+| `-l`             | Make dash act as if it had been invoked as a login shell.    |
+| `-m monitor`     | Turn on job control (set automatically when interactive).    |
+| `-s stdin`       | Read commands from standard input (set automatically if no file arguments are present).  This option has no effect when set after the shell has already started running (i.e. with set). |
+| `-V vi`          | Enable the built-in vi(1) command line editor (disables -E if it has been set). |
+| `-b notify`      | Enable asynchronous notification of background job completion.(UNIMPLEMENTED for 4.4alpha) |
+
+
+
+### Modifying `bash` Shell Behavior
+
+The built-in `set` allows you to change the values of shell options and set the positional parameters, or to display the names and values of shell variables. For further detail refer to [the set builtin](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html) section in [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html#SEC_Contents).
+
+| Option | Description                                                  |
+| ------ | ------------------------------------------------------------ |
+| `-a`   | Each variable or function that is created or modified is given the export attribute and marked for export to the environment of subsequent commands. |
+| `-b`   | Cause the status of terminated background jobs to be reported immediately, rather than before printing the next primary prompt. |
+| `-e`   | Exit immediately if a pipeline (see [Pipelines](https://www.gnu.org/software/bash/manual/html_node/Pipelines.html)), which may consist of a single simple command (see [Simple Commands](https://www.gnu.org/software/bash/manual/html_node/Simple-Commands.html)), a list (see [Lists](https://www.gnu.org/software/bash/manual/html_node/Lists.html)), or a compound command (see [Compound Commands](https://www.gnu.org/software/bash/manual/html_node/Compound-Commands.html)) returns a non-zero status. |
+| `-f`   | Disable filename expansion (globbing).                       |
+| `-t`   | Exit after reading and executing one command.                |
+| `-u`   | Treat unset variables and parameters other than the special parameters ‘@’ or ‘*’ as an error when performing parameter expansion. |
+| `--`   | If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters are set to the arguments, even if some of them begin with a ‘-’. |
+| `-`    | Signal the end of options, cause all remaining arguments to be assigned to the positional parameters. |
+
+
+
+### Expansions
+
+#### Brace Expansion
+
+
+
+#### Tilde Expansion
+
+
+
+#### Parameter Expansion
+
+The `$' character introduces parameter expansion, command substitution, or  arithmetic expansion. The  parameter  name  or symbol to be expanded may be enclosed in braces, which are optional but serve to protect the variable to be  expanded  from  characters immediately following it.
+
+|            Expansion             | *parameter* **Set and Not Null** | *parameter* **Set But Null** | *parameter* **Unset** |
+| :------------------------------: | :------------------------------: | :--------------------------: | :-------------------: |
+| **${**parameter***:-***word**}** |      substitute *parameter*      |      substitute *word*       |   substitute *word*   |
+| **${**parameter***-***word**}**  |      substitute *parameter*      |       substitute null        |   substitute *word*   |
+| **${**parameter***:=***word**}** |      substitute *parameter*      |        assign *word*         |     assign *word*     |
+| **${**parameter***=***word**}**  |      substitute *parameter*      |       substitute null        |     assign *word*     |
+| **${**parameter***:?***word**}** |      substitute *parameter*      |         error, exit          |      error, exit      |
+| **${**parameter***?***word**}**  |      substitute *parameter*      |       substitute null        |      error, exit      |
+| **${**parameter***:+***word**}** |        substitute *word*         |       substitute null        |    substitute null    |
+| **${**parameter***+***word**}**  |        substitute *word*         |      substitute *word*       |    substitute null    |
+
+For `bash` shell expansions refer to parameter expansions section in  man page.
+
+| Expansion                                          | Description          |
+| -------------------------------------------------- | -------------------- |
+| `${parameter:offset}` `${parameter:offset:length}` | Substring Expansion. |
+|                                                    |                      |
+|                                                    |                      |
+|                                                    |                      |
+
+
+
 ### Flow Control
 
 #### Logical expressions
