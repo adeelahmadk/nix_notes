@@ -36,21 +36,22 @@ git config --list
 
 ## Start a new Project
 
-- Initialize a new project repository in git:
-	```sh
+Initialize a new project repository in git:
+
+```sh
 mkdir testrepo
 cd testrepo
 git init
-	```
+```
 
-- Making changes
+### Making changes
 
-  Take a snapshot of the contents of files under the current directory and store to index:
-	```sh
-git add .
-git add file1 file2 file3
-	git add <file | dir>
-	```
+Take a snapshot of the contents of files under the current directory and store to index:
+```sh
+  git add .
+  git add file1 file2 file3
+  git add <file | dir>
+```
 
 See what is about to be committed:
 ```sh
@@ -86,47 +87,49 @@ git push origin master
 
 ## Setting up SSH access
 
-- List the files in your .ssh directory, if they exist
+List the files in your .ssh directory, if they exist
 
-	```sh
-ls -al ~/.ssh
-	```
+```sh
+    ls -al ~/.ssh
+```
 
-- Creates a new ssh key, using the provided email as a label
-	```sh
+Creates a new ssh key, using the provided email as a label
+```sh
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
-	```
+```
 
-- Generating public/private RSA key pair.
+To generating public/private RSA key pair, start the ssh-agent in the background
 
-	- start the ssh-agent in the background
-		```sh
-	eval "$(ssh-agent -s)" 
-	Agent pid 59566
-		```
-	- Add your SSH key to the ssh-agent
-		```sh
-	ssh-add ~/.ssh/id_rsa
-		```
-	- Attempts to ssh to GitHub
-		```sh
-	ssh -T git@github.com
-		```
-	
-- Switching remote URLs
-    - List remote URLs
-      ```sh
-      git remote -v
-      ```
+```sh
+eval "$(ssh-agent -s)" 
+Agent pid 59566
+```
 
-    - Change to HTTPS
-      ```sh
-      git remote set-url origin https://github.com/USERNAME/OTHERREPOSITORY.git
-      ```
-    - Change to SSH
-      ```sh
-      git remote set-url origin git@github.com:USERNAME/OTHERREPOSITORY.git
-      ```
+Add your SSH key to the ssh-agent
+```sh
+ssh-add ~/.ssh/id_rsa
+```
+
+Attempts to ssh to GitHub
+```sh
+ssh -T git@github.com
+```
+
+Before switching remote URLs, list
+
+```sh
+git remote -v
+```
+
+Change to HTTPS
+```sh
+git remote set-url origin https://github.com/USERNAME/OTHERREPOSITORY.git
+```
+
+Change to SSH
+```sh
+git remote set-url origin git@github.com:USERNAME/OTHERREPOSITORY.git
+```
 
 
 
@@ -160,7 +163,7 @@ your *keychain*, do it for an easier life. Save keys to: `~/.ssh/id_rsa_gh`
     ```
  Create your git aliases like so:
 	
-   ```ini
+   ```
     #Github (default)
     Host gh
     HostName github.com
@@ -338,7 +341,7 @@ git branch -D crazy-idea
 
 #### Renaming the default branch (master)
 
-##### For personal repo
+##### For personal repository
 
 To rename the default branch for your personal repository
 
@@ -358,7 +361,7 @@ git push origin --delete master
 git remote set-head origin -a
 ```
 
-##### For a cloned repo
+##### For a cloned repository
 
 If the branch was renamed
 
