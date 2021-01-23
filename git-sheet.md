@@ -1,8 +1,44 @@
 # GIT Command Reference
 
-[TOC]
+This document is a reference for a beginner. It's by no means an exhaustive listing of git commands. For an in-depth learning and reference use the [Pro Git book by Scott Chacon and Ben Straub, Apress 2014](https://git-scm.com/book/en/v2). 
 
+## Contents
 
+- [Configuration](#Configuration)
+
+- [States in which file might exist](#States-in-which-file-might-exist)
+
+- [Start a new Project](#Start-a-new-Project)
+
+- [Making changes](#Making-changes)
+
+- [Setting up SSH access](#Setting-up-SSH-access)
+
+- [Configure multiple Versioning Hosts](#Configure-multiple-Versioning-Hosts)
+
+- [Push to upstream repo cloned prior to ssh key setup](#Push-to-upstream-repo-cloned-prior-to-ssh-key-setup)
+
+- [Regular work-flow maintenance](#Regular-work-flow-maintenance)
+
+    - [Connect/View/Change remote repository](#Connect/View/Change-remote-repository)
+
+    - [Remove a file from Staging or Commit](#Remove-a-file-from-Staging-or-Commit)
+
+    - [Push/Pull Repos](#Push/Pull-Repos)
+
+    - [Viewing project history](#Viewing-project-history)
+
+    - [Branches](#Branches)
+
+        - [Renaming the default branch (master)](#Renaming-the-default-branch-(master))
+
+    - [Tags](#Tags)
+
+    - [Sync with upstream changes](#Sync-with-upstream-changes)
+
+    - [Git Clone](#Git-Clone)
+
+        
 
 ## Configuration
 
@@ -135,73 +171,68 @@ git remote set-url origin git@github.com:USERNAME/OTHERREPOSITORY.git
 
 ## Configure multiple Versioning Hosts
 
-1. Create SSH Keys
-	```sh
-	ssh-keygen -t rsa -C "github email"
-	```
-Enter *passphrase* when prompted. If you see an option to save the *passphrase* in 
-your *keychain*, do it for an easier life. Save keys to: `~/.ssh/id_rsa_gh`
-	
-	Repeat for bitbucket:
-    ```sh
-   ssh-keygen -t rsa -C "bitbucket email"
-    ```
-	Save bitbucket key to `~/.ssh/id_rsa_bb`
-	
-2. Attach Keys
-    ```sh
-    xclip -sel clip < ~/.ssh/id_rsa_gh.pub
-    xclip -sel clip < ~/.ssh/id_rsa_bb.pub
-    ```
-    Paste into text area, under ssh settings, in your github or bitbucket account.
+Create SSH Keys
+```sh
+ssh-keygen -t rsa -C "github email"
+```
+Enter *passphrase* when prompted. If you see an option to save the *passphrase* in your *keychain*, do it for an easier life. Save keys to: `~/.ssh/id_rsa_gh`. Repeat for bitbucket:
 
-3. Create `config` file
-	Enter your editor here if different:
-   
-    ```sh
-   vim ~/.ssh/config
-    ```
+```sh
+ssh-keygen -t rsa -C "bitbucket email"
+```
+Save bitbucket key to `~/.ssh/id_rsa_bb`
+
+Attach Keys
+```sh
+xclip -sel clip < ~/.ssh/id_rsa_gh.pub
+xclip -sel clip < ~/.ssh/id_rsa_bb.pub
+```
+Paste into text area, under ssh settings, in your github or bitbucket account. Now, create `config` file (enter your editor here if different)
+
+```sh
+vim ~/.ssh/config
+```
  Create your git aliases like so:
-	
-   ```
-    #Github (default)
-    Host gh
-    HostName github.com
-    User git
+
+```
+ #Github (default)
+ Host gh
+ HostName github.com
+ User git
  IdentityFile ~/.ssh/id_rsa
-	
-   #Bitbucket (secondary)
-    Host bb
-    HostName bitbucket.org
-    User git
+
+#Bitbucket (secondary)
+ Host bb
+ HostName bitbucket.org
+ User git
  IdentityFile ~/.ssh/id_rsa_bb
-   
-    # Must add this line if you want to be able to ssh 
-    # in to your local machines
-    #Others
-    Host *
-    IdentityFile ~/.ssh/id_rsa
-	 IdentitiesOnly yes
-	```
-	
-4. Add the identities to SSH:
-    ```sh
-    ssh-add ~/.ssh/id_rsa_gh
-    ssh-add ~/.ssh/id_rsa_bb
-    ```
-    
-    Enter *passphrase* if prompted. Check keys were added:
-	```sh
+
+ # Must add this line if you want to be able to ssh 
+ # in to your local machines
+ #Others
+ Host *
+ IdentityFile ~/.ssh/id_rsa
+ IdentitiesOnly yes
+```
+
+Add the identities to SSH:
+```sh
+ssh-add ~/.ssh/id_rsa_gh
+ssh-add ~/.ssh/id_rsa_bb
+```
+
+Enter *passphrase* if prompted. Check keys were added:
+```sh
 ssh-add -l
-	```
+```
 
-5. Check that repo recognizes keys:
-    ```sh
-    ssh -T gh
-    ssh -T bb
-    ```
+Check that repo recognizes keys:
+```sh
+ssh -T gh
+ssh -T bb
+```
 
-### Push to upstream repo cloned before ssh key setup
+### Push to upstream repo cloned prior to ssh key setup
 ```sh
 git push git@gh:username/repo
 ```
