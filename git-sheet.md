@@ -20,17 +20,17 @@ This document is a reference for a beginner. It's by no means an exhaustive list
 
 - [Regular work-flow maintenance](#Regular-work-flow-maintenance)
 
-    - [Connect/View/Change remote repository](#Connect/View/Change-remote-repository)
+    - [Connect/View/Change remote repository](#Connect-View-Change-remote-repository)
 
     - [Remove a file from Staging or Commit](#Remove-a-file-from-Staging-or-Commit)
 
-    - [Push/Pull Repos](#Push/Pull-Repos)
+    - [Push/Pull Repos](#Push-Pull-Repos)
 
     - [Viewing project history](#Viewing-project-history)
 
     - [Branches](#Branches)
 
-        - [Renaming the default branch (master)](#Renaming-the-default-branch-(master))
+        - [Renaming the default branch (master)](#Renaming-the-default-branch)
 
     - [Tags](#Tags)
 
@@ -243,7 +243,7 @@ git push git@bb:sername/repo
 
 ## Regular work-flow maintenance
 
-### Connect/View/Change remote repository
+### Connect View Change remote repository
 
 Connect to repository `remote_repo`(on GitHub etc.) in branch `master` with **user_name**
 
@@ -289,7 +289,7 @@ git rm --cached <file-name>
 ```
 By running above command, the file will appear in the untracked file section.
 
-### Push/Pull Repos
+### Push Pull Repos
 
 Push the *committed* contents of local repository into the remote host repository (GitHub etc.) in branch origin/master
 
@@ -370,7 +370,7 @@ If you develop on a branch crazy-idea, then regret it, delete the branch with:
 git branch -D crazy-idea
 ```
 
-#### Renaming the default branch (master)
+#### Renaming the default branch
 
 ##### For personal repository
 
