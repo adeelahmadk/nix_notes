@@ -336,6 +336,43 @@ If you develop on a branch crazy-idea, then regret it, delete the branch with:
 git branch -D crazy-idea
 ```
 
+#### Renaming the default branch (master)
+
+##### For personal repo
+
+To rename the default branch for your personal repository
+
+```sh
+# rename your local branch
+git branch -m master main
+# push renamed branch upstream & set remote tracking branch
+git push -u origin main
+```
+
+Then log into the upstream repository host (GitHub, GitLab, Bitbucket, etc.) and change the **default branch**.
+
+```sh
+# delete the old branch upstream
+git push origin --delete master
+# update the upstream remote's HEAD
+git remote set-head origin -a
+```
+
+##### For a cloned repo
+
+If the branch was renamed
+
+```sh
+# fetch the latest branch
+git fetch --all
+# update the upstream remote's HEAD
+git remote set-head origin -a
+# switch your local branch to track the new remote branch
+git branch --set-upstream-to origin/main
+# rename your branch locally
+git branch -m master main
+```
+
 ### Tags
 
 When working with Git, it is quite common for developers to create tags in order to have reference points in your development. Tags are created in order to have references to release versions for example.

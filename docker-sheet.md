@@ -1,6 +1,27 @@
 # Docker Command Reference 
 
-[TOC]
+
+
+## Contents
+
+- [Docker Basics](#Docker-Basics)
+    - [Docker Images](#Docker-Images)
+    - [Container Life-cycle](#Container Life-cycle)
+- [Dockerfile](#Dockerfile)
+    - [Syntax](#Syntax)
+    - [`.dockerignore` file](#-file)
+    - [Instructions](#Instructions)
+    - [Practices](#Practices)
+- [Talking to the outside world](#Talking-to-the-outside-world)
+    - [Network Ports](#Network-Ports)
+- [Docker-Compose](#Docker-Compose)
+- [Complementary Topics](#Complementary-Topics)
+    - [Running GUI application in a container](#Running-GUI-application-in-a-container)
+    - [Alpine Linux Commands](#Alpine-Linux-Commands)
+    - [Image Analysis and Optimization](#Image-Analysis-and-Optimization)
+- [References](#References)
+
+
 
 [Top](#Docker-Command-Reference) [Next>](#Dockerfile)
 
@@ -36,7 +57,20 @@ docker image inspect alpine --format '{{.ContainerConfig.Cmd}}'
 docker image inspect alpine --format '{{.ContainerConfig.Env}}'
 ```
 
-### Container Life-cycle: Run/List/Stop/Remove
+#### Create a tag
+
+We can define as many tags as we want for docker images in our repository. In fact, a tag is a human-readable string aliases to the **IMAGE ID** hashes.
+
+```sh
+docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
+docker tag 1212d7ff8c47 sandbox:0.1
+```
+
+
+
+[< Prev](#Docker-Basics) [Top](#Docker-Command-Reference) [Next >](#Dockerfile)
+
+### Container Life-cycle
 
 #### Run interactively
 
@@ -179,7 +213,7 @@ docker network prune
 docker volume prune
 ```
 
-[<Prev](#Docker-Basics) [Top](#Docker-Command-Reference) [Next>](#Talking-to-the-outside-world)
+[< Prev](#Docker-Basics) [Top](#Docker-Command-Reference) [Next >](#Talking-to-the-outside-world)
 
 ## Dockerfile
 
@@ -189,9 +223,13 @@ Contents of this section are mostly borrowed from docker docs topics [Dockerfile
 
 
 
+[< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Practices)
+
 ### `.dockerignore` file
 
 
+
+[< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Practices)
 
 ### Instructions
 
@@ -300,6 +338,8 @@ The output of the final `pwd` command in this `Dockerfile` would be `/path/$DIRN
 
 
 
+[< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Talking-to-the-outside-world)
+
 ### Practices
 
 #### Set shell aliases or functions for Docker containers
@@ -383,7 +423,7 @@ RUN chown lemp:lemp /var/www/html
 
 
 
-[<Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next>](#Docker-Compose)
+[< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Docker-Compose)
 
 ## Talking to the outside world
 
@@ -419,15 +459,19 @@ docc logs api
 
 This will reveal AP logs of incoming requests and respective  responses.
 
-[<Prev](#Talking-to-the-outside-world) [Top ](#Docker-Command-Reference) [Next>](#Alpine-Linux-commands)
+[< Prev](#Talking-to-the-outside-world) [Top ](#Docker-Command-Reference) [Next >](#Complementary-Topics)
 
 ## Docker-Compose
 
 
 
-[<Prev](#Docker-Compose) [Top](#Docker-Command-Reference) 
+[< Prev](#Talking-to-the-outside-world) [Top](#Docker-Command-Reference) 
 
-## Running GUI application within a container
+## Complementary Topics
+
+
+
+### Running GUI application in a container
 
 The main use-case for containers are servers, daemons and applications run in headless mode. They are mostly used to develop and deploy applications. However, containers can also be used to run desktop (GUI) applications in a sandbox. The key to this use-case is the X server running on the host operating system. We need to allow an X client to connect to the host X server to display its GUI on host's display. This is achieve by using `docker run` options `-e` (environment variable) and `-v` (volume). Here, we pass `$DISPLAY` variable from host shell with `-e` and mount host's X server socket from host to the container as a shared volume with `-v`. Finally, we need to allow non-network local connections to the host's X server. This is achieved by updating access control list using `xhost` command. [[Ref# 5,6](#References)]
 
@@ -467,13 +511,23 @@ and viola!
 
 ![](img/docker_firefox_clip1.png)
 
-[<Prev](#Running-GUI-application-within-a-container) [Top](#Docker-Command-Reference) 
+#### Display Size
 
-## Alpine Linux commands
+Sometimes, the display size from Docker container is not ideal. We could set the display size using environment variables `DISPLAY_WIDTH` and `DISPLAY_HEIGHT`.
 
-Since Alpine is based on BusyBox, its commands (e.g. `adduser` and `addgroup`) are different from Debian, Ubuntu etc.
+```sh
+docker run -it --rm --name firefox -e DISPLAY=$DISPLAY -e DISPLAY_WIDTH=3840 -e DISPLAY_HEIGHT=2160 -v /tmp/.X11-unix:/tmp/.X11-unix browser-box
+```
 
-### User management
+
+
+[< Prev](#Docker-Compose) [Top](#Docker-Command-Reference) 
+
+### Alpine Linux commands
+
+Since Alpine is based on BusyBox, its commands (e.g. `adduser` and `addgroup`) are different from full-scale Linux shells like bash, zsh etc.
+
+#### User management
 
 Users & groups are frequently added to a docker container build for a variety of reasons. Options for `adduser` command are:
 
@@ -548,9 +602,117 @@ RUN addgroup \
 
 
 
+[<Prev](#Running-GUI-application-in-a-container) [Top](#Docker-Command-Reference) [Next >](#References)
+
+### Image Analysis and Optimization
+
+Useful tools for image analysis and optimization:
+
+- [dive](https://github.com/wagoodman/dive)
+- [DockerSlim](https://dockersl.im/)
+
+#### Image Layers
+
+A docker image is stacked-up files to be instantiated as a running container. Docker utilizes the Union File System (*UnionFS*) which groups files as layers. Each layer may contain one or more files and every layered on top of the previous layer. The virtual runtime merge of these layers results in a unified file system.
+
+![Docker Image File System](img/docker_img_fs.png)
+
+The final file system view presented to the user by the underlying implementation of *UnionFS* (via [docker's pluggable storge drivers](https://docs.docker.com/storage/storagedriver/select-storage-driver/)) has the total size of all layers collectively. When docker builds an image, it uses all the layers in a read-only format adding a thin read-write (rw) layer on top of them. This rw-layer allows us to modify files in a running container.
+
+![](img/docker_cont_fs.png)
+
+A file deleted from the container will not appear in the file system, however the size it occupied will still be the part of the container's footprint for it was included in a lower read-only layer. It's easy to start with a slim app binary and end up with a fat container image. In the following sections we'll take a look at some methods of analysis and optimization to keep our images as slim as possible.
+
+#### Build Path
+
+We should keep in mind that a Docker build is a client-server process. The Docker CLI (client), where we execute the `docker build` command from, uses the underlying Docker engine (server) to build a container image. To restrict access to the underlying file system of the client, the build process needs to know what the virtual file system root is and where the commands in your `Dockerifle` should try to find file resources to place in the image being built. If we carelessly define an `ADD`/`COPY` command in the `Dockerfile`, all those files can be part of the final image. Most of the time, this is not what we need as only a few selected project artefacts should be included in the final container image.
+
+```sh
+docker build .
+```
+
+If for any reason you really need to define the root of your project as the build context, you can selectively include/exclude files via `.dockerignore`. The CLI interprets the `.dockerignore` file as a newline-separated list of patterns similar to the file globs of Unix shells. If a line in `.dockerignore` file starts with `#` in column 1, then this line is considered as a comment and is ignored before interpreted by the CLI. 
+
+This file causes the following build behavior:
+
+| Rule        | Behavior                                                     |
+| :---------- | :----------------------------------------------------------- |
+| `# comment` | Ignored.                                                     |
+| `*/temp*`   | Exclude files and directories whose names start with `temp` in any immediate subdirectory of the root. For example, the plain file `/somedir/temporary.txt` is excluded, as is the directory `/somedir/temp`. |
+| `*/*/temp*` | Exclude files and directories starting with `temp` from any subdirectory that is two levels below the root. For example, `/somedir/subdir/temporary.txt` is excluded. |
+| `temp?`     | Exclude files and directories in the root directory whose names are a one-character extension of `temp`. For example, `/tempa` and `/tempb` are excluded. |
+
+For details, check [Dockerfile reference documentation](https://docs.docker.com/engine/reference/builder/#dockerignore-file).
+
+#### Normalize Layers
+
+The maximum number of layers an image can have is 127, provided your underlying storage driver supports it. This limit can be increased, if really needed, with Docker engine running on a similarly modified underlying Kernel. As discussed earlier, whatever file resource goes into a layer stays in the layer even if you `rm` that file in a subsequent layer. Therefore, we need to avoid and/or get rid of the wasted spaces.
+
+##### Command merge
+
+It's when a `Dockerfile`  is written with an extremely long `RUN` directive where multiple shell commands are aggregated with `&&`. By merging commands, we essentially create a single layer out of the result of this single long command. As each `RUN` directive adds a layer to the image.
+
+##### Squashing the image
+
+An alternative approach especially when using someone else’s `Dockerfile` that you don’t want or can’t modify, is to build your image with Docker’s `--squash` command. It's available for all **Docker versions >= 1.13**.
+
+```sh
+docker build --squash .
+```
+
+However, remember that squashing your layers may prevent you or the users of your image from taking advantage of previously cached layers. You may use a tool [dive](https://github.com/wagoodman/dive) to check the final efficiency of the image.
+
+#### Delete Caches
+
+often when we containerize an application, we need to make extra tools, libraries, or utilities available on the image we build by using a package manager such as `apk`, `yum`, or `apt`. This leaves us a cache of fetched packages. To keep the size of our resulting Docker image as small as possible, we need to remove this package cache in a command merge.
+
+```sh
+# in case of a Debian/Ubuntu base image
+apt-get clean && rm -rf /var/lib/apt/lists/*
+# in case of a Red Hat/CentOS base image
+rm -rf /var/cache/yum
+# in case of an Alpine base image
+rm -rf /tmp/* /var/cache/apk/*
+```
+
+#### Base Image
+
+There are a lot of different base images to choose from, each one with its own perks and features. Choosing an image which provides just enough of the tools and the environment you need for your application to run is of paramount importance when it comes to the final size of your own Docker image.
+
+| **Image Type**        | **Alpine** | **CentOS**     | **Debian**     | **Debian Slim** | **Fedora**     | **UBI**        | **UBI Minimal** | **UBI Micro**  | **Ubuntu LTS** |
+| --------------------- | ---------- | -------------- | -------------- | --------------- | -------------- | -------------- | --------------- | -------------- | -------------- |
+| **Version**           | **3.11**   | **7.8**        | **Bullseye**   | **Bullseye**    | **31**         | **8.2**        | **8.2**         | **8.2**        | **20.04**      |
+| **Architecture**      |            |                |                |                 |                |                |                 |                |                |
+| C Library             | muslc      | glibc          | glibc          | glibc           | glibc          | glibc          | glibc           | glibc          | glibc          |
+| Package Format        | apk        | rpm            | dpkg           | dpkg            | rpm            | rpm            | rpm             |                | dpkg           |
+| Dependency Management | apk        | yum            | apt            | apt             | dnf            | yum/dnf        | yum/dnf         | yum/dnf        | apt            |
+| Core Utilities        | Busybox    | GNU Core Utils | GNU Core Utils | GNU Core Utils  | GNU Core Utils | GNU Core Utils | GNU Core Utils  | GNU Core Utils | GNU Core Utils |
+| Compressed Size       | 2.7MB      | 71MB           | 49MB           | 26MB            | 63MB           | 69MB           | 51MB            | 12MB           | 27MB           |
+| Storage Size          | 5.7MB      | 202MB          | 117MB          | 72MB            | 192MB          | 228MB          | 140MB           | 36MB           | 73MB           |
+
+Reference: [Crunchtools](http://crunchtools.com/comparison-linux-container-images/#Comparison_of_Images)
+
+Before choosing Alpine as your default base image, you should check if it provides all the environment you need. Also, even though Alpine comes with a package manager, you may find that a specific package or package version you’re using in your (for instance) Ubuntu-based development environment isn’t available in Alpine. These are trade-offs you should be aware of and test before you choose the most appropriate base image for your project.
+
+Finally, if you really need to use one of the fatter base images, you could use an image minimization tool, such as the free and open source [DockerSlim](https://dockersl.im/), to still reduce the size of your final image. 
+
+#### Use no base image
+
+If you have an application that can run without any additional environment provided by a base image, you can opt to not use a base image at all. Of course, since `FROM` is mandatory in a `Dockerfile`, you must still have it and point it to something. For this we have `FROM Scratch`, *which is a no-op in the Dockerfile, and will not create an extra layer in your image*. If your application consists of self-contained executables that can operate in a standalone fashion, choosing the `scratch` base image allows you to minimize the footprint of your container as much as possible. 
+
+#### Multi-Stage Builds
+
+A multi-stage build allows image builders to leave custom image build scripts behind and integrate everything into the well-known `Dockerfile` format. you can think of a multi-stage build as merging multiple `Dockerfiles` together, or simply a `Dockerfile` with multiple `FROM`s. Although there is nothing technically wrong with the vintage process, the final image and the resulting container are bloated with layers created while building/preparing the project artifact that are not necessary for the project’s runtime environment.
+
+Multi-stage builds allow you to separate the creation/preparation phases from the runtime environment
+
+![](/home/adeel/Documents/nix_notes/img/docker_multistage_build.png)
+
+You can still have a single `Dockerfile` to define your complete build workflow. However, you can copy artifacts from one stage to another while discarding the data in layers you don’t need.
+
+Multi-stage builds allow you to create cross-platform, repeatable builds without using OS-specific, custom build scripts. The final size of your image can be kept to a minimum by selectively including artifacts generated in previous phases of your build.
+
 [<Prev](#Alpine-Linux-commands) [Top](#Docker-Command-Reference)
-
-
 
 ## References
 
@@ -560,3 +722,5 @@ RUN addgroup \
 4. Docker compose reference
 5. Lei Mao's [log book](https://leimao.github.io/blog/Docker-Container-GUI-Display/).
 6. [linuxmeerkat](https://linuxmeerkat.wordpress.com/2014/10/17/running-a-gui-application-in-a-docker-container/) blog.
+
+[<Prev](#Image-Analysis-and-Optimization) [Top](#Docker-Command-Reference)
