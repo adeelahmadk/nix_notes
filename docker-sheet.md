@@ -19,6 +19,13 @@
     - [Running GUI application in a container](#Running-GUI-application-in-a-container)
     - [Alpine Linux Commands](#Alpine-Linux-Commands)
     - [Image Analysis and Optimization](#Image-Analysis-and-Optimization)
+        - [Image Layers](#Image-Layers)
+        - [Build Path](#Build-Path)
+        - [Normalize Layers](#Normalize-Layers)
+        - [Delete Caches](#Delete-Caches)
+        - [Base Image](#Base-Image)
+        - [Build from Scratch](#Build-from-Scratch)
+        - [Multi-Stage Builds](#Multi-Stage-Builds)
 - [References](#References)
 
 
@@ -690,13 +697,13 @@ There are a lot of different base images to choose from, each one with its own p
 | Compressed Size       | 2.7MB      | 71MB           | 49MB           | 26MB            | 63MB           | 69MB           | 51MB            | 12MB           | 27MB           |
 | Storage Size          | 5.7MB      | 202MB          | 117MB          | 72MB            | 192MB          | 228MB          | 140MB           | 36MB           | 73MB           |
 
-Reference: [Crunchtools](http://crunchtools.com/comparison-linux-container-images/#Comparison_of_Images)
+Source: [Crunchtools](http://crunchtools.com/comparison-linux-container-images/#Comparison_of_Images)
 
 Before choosing Alpine as your default base image, you should check if it provides all the environment you need. Also, even though Alpine comes with a package manager, you may find that a specific package or package version you’re using in your (for instance) Ubuntu-based development environment isn’t available in Alpine. These are trade-offs you should be aware of and test before you choose the most appropriate base image for your project.
 
 Finally, if you really need to use one of the fatter base images, you could use an image minimization tool, such as the free and open source [DockerSlim](https://dockersl.im/), to still reduce the size of your final image. 
 
-#### Use no base image
+#### Build from Scratch
 
 If you have an application that can run without any additional environment provided by a base image, you can opt to not use a base image at all. Of course, since `FROM` is mandatory in a `Dockerfile`, you must still have it and point it to something. For this we have `FROM Scratch`, *which is a no-op in the Dockerfile, and will not create an extra layer in your image*. If your application consists of self-contained executables that can operate in a standalone fashion, choosing the `scratch` base image allows you to minimize the footprint of your container as much as possible. 
 
@@ -706,7 +713,7 @@ A multi-stage build allows image builders to leave custom image build scripts be
 
 Multi-stage builds allow you to separate the creation/preparation phases from the runtime environment
 
-![](/home/adeel/Documents/nix_notes/img/docker_multistage_build.png)
+![](img/docker_multistage_build.png)
 
 You can still have a single `Dockerfile` to define your complete build workflow. However, you can copy artifacts from one stage to another while discarding the data in layers you don’t need.
 
