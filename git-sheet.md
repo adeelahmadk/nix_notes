@@ -61,6 +61,14 @@ View git configurations:
 git config --list
 ```
 
+Or just for the global config
+
+```sh
+git config --global --list
+```
+
+
+
 ## States in which file might exist
 
 | State | Description |
@@ -121,12 +129,128 @@ Push repo to the remote host:
 git push origin master
 ```
 
+### Consistent Commit messages
+
+The ability to write consistent commit messages help in project tracking and management. You can set a file to act as a commit message template through git’s global configuration. First, create a file in a directory of your choice
+
+```sh
+touch commit-conventions
+```
+
+Open this file with the editor of your choice. Git will ignore lines that begin with a `#` or `;` by default.
+
+> By default, [git allows both `#` and `;` as comment characters for configuration files](https://git-scm.com/docs/git-config#_syntax), but you can set a character of your choice with `git config --global core.commentChar '#'`, substituting `#` with your preferred character.
+
+You can place your template in this file, for example
+
+```
+# ----------------------------------------------------------
+# Header - type(scope): Brief description
+# ----------------------------------------------------------
+#    * feat             A new feature - SemVar PATCH
+#    * fix              A bug fix - SemVar MINOR
+#    * BREAKING CHANGE  Breaking API change - SemVar MAJOR
+#    * docs             Change to documentation only
+#    * style            Change to style (whitespace, etc.)
+#    * refactor         Change not related to a bug or feat
+#    * perf             Change that affects performance
+#    * test             Change that adds/modifies tests
+#    * build            Change to build system
+#    * ci               Change to CI pipeline/workflow
+#    * chore            General tooling/config/min refactor
+# ----------------------------------------------------------
+
+
+# ----------------------------------------------------------
+# Body - More description, if necessary
+# ----------------------------------------------------------
+#    * Motivation behind changes, more detail into how
+#      functionality might be affected, etc.
+# ----------------------------------------------------------
+
+
+# ----------------------------------------------------------
+# Footer - Associated issues, PRs, etc.
+# ----------------------------------------------------------
+#    * Ex: Resolves Issue #207, see PR #15, etc.
+# ----------------------------------------------------------
+
+```
+
+To add the template to your global `git config` is enter the following:
+
+```sh
+git config --global commit.template path/to/your/template/file
+```
+
+ just enter `git commit` to open your default editor with the template in place. You’ll automatically have a guide to choose conventions from to create a structured message.
+
+```
+# ----------------------------------------------------------
+# Header - type(scope): Brief description
+# ----------------------------------------------------------
+#    * feat             A new feature - SemVar PATCH
+#    * fix              A bug fix - SemVar MINOR
+#    * BREAKING CHANGE  Breaking API change - SemVar MAJOR
+#    * docs             Change to documentation only
+#    * style            Change to style (whitespace, etc.)
+#    * refactor         Change not related to a bug or feat
+#    * perf             Change that affects performance
+#    * test             Change that adds/modifies tests
+#    * build            Change to build system
+#    * ci               Change to CI pipeline/workflow
+#    * chore            General tooling/config/min refactor
+# ----------------------------------------------------------
+docs: Update README with contributing instructions
+
+# ----------------------------------------------------------
+# Body - More detailed description, if necessary
+# ----------------------------------------------------------
+#   * Motivation behind changes, more detail into how 
+# functionality might be affected, etc.
+# ----------------------------------------------------------
+Adds a CONTRIBUTING.md with PR best practices, code style 
+guide, and code of conduct for contributors.
+
+# ----------------------------------------------------------
+# Footer - Associated issues, PRs, etc.
+# ----------------------------------------------------------
+#   * Ex: Resolves Issue #207, see PR #15, etc.
+# ----------------------------------------------------------
+Closes #9
+```
+
+The final message will simply look like this:
+
+```
+docs: Update README with contributing instructions
+
+Adds a CONTRIBUTING.md with PR best practices, code style 
+guide, and code of conduct for contributors.
+
+Closes #9
+```
+
+If you use Vim or Neovim, and you want to speed up the process even more, you can add this to your git config:
+
+```sh
+# Neovim
+git config --global core.editor "nvim +16 -c 'startinsert'"
+
+# Vim
+git config --global core.editor "vim +16 +startinsert"
+```
+
+This sets the default editor to Neovim (or Vim), and places the cursor on line 16 in Insert Mode as soon the editor opens. 
+
+**Credit**: [Keeping Git Commit Messages Consistent with a Custom Template by Timothy Merritt](https://dev.to/timmybytes/keeping-git-commit-messages-consistent-with-a-custom-template-1jkm)
+
 ## Setting up SSH access
 
 List the files in your .ssh directory, if they exist
 
 ```sh
-    ls -al ~/.ssh
+ls -al ~/.ssh
 ```
 
 Creates a new ssh key, using the provided email as a label
