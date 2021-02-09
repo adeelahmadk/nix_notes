@@ -1,6 +1,6 @@
 # GIT Command Reference
 
-This document is a reference for a beginner. It's by no means an exhaustive listing of git commands. For an in-depth learning and reference use the [Pro Git book by Scott Chacon and Ben Straub, Apress 2014](https://git-scm.com/book/en/v2). 
+This document is a reference for a beginner. It's by no means an exhaustive listing of git commands. For an in-depth learning and reference use the [Pro Git book by Scott Chacon and Ben Straub, Apress 2014](https://git-scm.com/book/en/v2).
 
 ## Contents
 
@@ -9,6 +9,9 @@ This document is a reference for a beginner. It's by no means an exhaustive list
 - [States in which file might exist](#States-in-which-file-might-exist)
 
 - [Start a new Project](#Start-a-new-Project)
+
+    - [Making changes](#Making-changes)
+    - [Consistent Commit messages](#Consistent-Commit-messages)
 
 - [Making changes](#Making-changes)
 

@@ -65,6 +65,19 @@ The built-in `set` allows you to change the values of shell options and set the 
 
 
 
+### File information
+
+
+
+| Command    | Option               | Description                                                  |
+| ---------- | -------------------- | ------------------------------------------------------------ |
+| `basename` | `-s` to strip suffix | Print NAME with any leading directory components removed.  If specified, also remove a trailing SUFFIX. e.g. `basename $0` |
+| `dirname`  |                      | Output each NAME with its last non-slash component and trailing slashes removed; if NAME contains no /'s, output '.' (meaning the current directory). e.g. `dirname $0` |
+| `realpath` |                      | Print the resolved absolute file name; all but the last component must exist. |
+| `readlink` |                      | Print resolved symbolic links or canonical file names        |
+
+
+
 ### Expansions
 
 #### Brace Expansion

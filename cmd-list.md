@@ -1336,6 +1336,46 @@ sha256sum file > file.sha256
 sha256sum -c file.sha256
 ```
 
+
+
+### Package Management
+
+#### `apt-key`
+
+`Usage: apt-key [--keyring file] [command] [arguments]`
+
+Manage `apt`'s list of trusted keys
+
+| Option                   | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| apt-key add <`file`>     | add the key contained in <`file`> ('-' for `stdin`) |
+| apt-key del <`keyid`>    | remove the key <`keyid`>                            |
+| apt-key export <`keyid`> | output the key <`keyid`>                            |
+| apt-key exportall        | output all trusted keys                             |
+| apt-key update           | update keys using the keyring package               |
+| apt-key net-update       | update keys using the network                       |
+| apt-key list             | list keys                                           |
+| apt-key finger           | list fingerprints                                   |
+| apt-key adv              | pass advanced options to gpg (download key)         |
+
+##### Examples
+
+Add a gpg key for an upstream repository
+
+```sh
+curl -sS https://example.com/debian/pubkey.gpg | sudo apt-key add -
+# example
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+```
+
+Refresh/update all keys from a key server
+
+```sh
+sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
+```
+
+Above command relies on package repository maintainers uploading their public keys to the **Ubuntu** *keyserver*, resort to the original `apt-key add ` command if they don't.
+
 ### Backup & Archiving
 
 #### dd

@@ -493,6 +493,55 @@ Download video of a certain quality with code preceded by `-f` option:
 youtube-dl -f18 --yes-playlist -o '~/Videos/stats/%(playlist_index)s-%(title)s[%(width)sx%(height)s,%(ext)s].%(ext)s' https://www.youtube.com/playlist?list=XXXXXX
 ```
 
+
+
+### Speech Synthesis
+
+#### SVOX Pico TTS
+
+To install
+
+```sh
+sudo apt install libttspico-utils
+```
+
+The main command converts text to `.wave` file.
+
+```sh
+pico2wave -l en_US -w tmp.wav "Welcome to Linux" && aplay -q tmp.wav && rm tmp.wav
+```
+
+Custom scripts to automate use of [Vanilla Pico TTS](https://github.com/cod3g3nki/automate-tasks/blob/main/shell/picotts) and [Pico TTS with text selection](https://github.com/cod3g3nki/automate-tasks/blob/main/shell/picotts-sel) can be found in the [automation repo](https://github.com/cod3g3nki/automate-tasks).
+
+#### Festival
+
+To install
+
+```sh
+sudo apt install festival festvox-us-slt-hts
+```
+
+The additional package `festvox-us-slt-hts` includes a better quality female sound for US English. The default configuration file is `~/.festivalrc` written in SCHEME syntax. A sample file would look like
+
+```scheme
+(Parameter.set 'Audio_Method 'Audio_Command)
+(Parameter.set 'Audio_Command "aplay -q -c 1 -t raw -f s16 -r $SR $FILE")
+
+(set! voice_default voice_cmu_us_slt_arctic_hts)
+```
+
+To use
+
+```sh
+festival --tts "Welcome to Linux"
+```
+
+To automate TTS for selected text, save following as a script file
+
+```sh
+xsel | festival --tts --pipe
+```
+
 ## Running applications
 
 ### Browser:
