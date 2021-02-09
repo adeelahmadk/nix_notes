@@ -10,101 +10,139 @@ Above mentioned features also give Vim one of the steepest learning curves the t
 
 Some useful commands from the default configuration are as follows:
 
-| command / key                  | mode | description                                                  |
-| ------------------------------ | ---- | ------------------------------------------------------------ |
-| :help [keyword]                |      | Performs a search of help documentation                      |
-| :e [file]                      |      | Opens a file                                                 |
-| :w                             |      | Saves the file you are working on                            |
-| :w [filename]                  |      | save your file with the name                                 |
-| :wq                            |      | Save your file and close Vim                                 |
-| :q!                            |      | Quit without first saving the file                           |
-| **MOVEMENT**                   |      |                                                              |
-| h/l                            | n    | Moves the cursor to the left/right                           |
-| j/k                            | n    | Moves the cursor up/down one line                            |
-| H                              | n    | Puts the cursor at the top of the screen                     |
-| M                              | n    | Puts the cursor in the middle of the screen                  |
-| L                              | n    | Puts the cursor at the bottom of the screen                  |
-| w                              |      | Puts the cursor at the start of the next word                |
-| b                              |      | Puts the cursor at the start of the previous word            |
-| e                              |      | Puts the cursor at the end of a word                         |
-| O                              |      | Places the cursor at the beginning of a line                 |
-| $                              |      | Places the cursor at the end of a line                       |
-| )                              |      | Takes you to the start of the next sentence                  |
-| (                              |      | Takes you to the start of the previous sentence              |
-| }                              |      | Takes you to the start of the next paragraph or block of text |
-| {                              |      | Takes you to the start of the previous paragraph or block of text |
-| C-f                            |      | Takes you one page forward                                   |
-| C-b                            |      | Takes you one page back                                      |
-| gg                             |      | Places the cursor at the start of the file                   |
-| G                              |      | Places the cursor at the end of the file                     |
-| #                              |      | takes you to the line specified (#: line number.)            |
-| **Editing**                    |      |                                                              |
-| a                              |      | Append text after the cursor [count] times.                  |
-| A                              |      | Append text at the end of the line [count] times.            |
-| i                              |      | Insert text before the cursor [count] times.                 |
-| I                              |      | Insert text before the first non-blank in the line [count] times. |
-| yy                             |      | Copies a line. `5yy` copies 5 lines                          |
-| yw                             |      | Copies a word                                                |
-| y$                             |      | Copies from cursor to the end of a line                      |
-| v                              |      | Highlight one character at a time                            |
-| V                              |      | Highlights one line                                          |
-| p                              |      | Paste whatever has been copied to the unnamed register       |
-| d                              |      | Deletes highlighted text                                     |
-| dd                             |      | Deletes a line of text. `5dd` deletes 5 lines from cursor position |
-| dw                             |      | Deletes a word                                               |
-| D                              |      | Deletes everything from cursor to the end of the line        |
-| d0                             |      | Deletes everything from cursor to the beginning of the line  |
-| dgg                            |      | Deletes everything from cursor to the beginning of the file  |
-| dG                             |      | Deletes everything from cursor to the end of the file        |
-| x                              |      | Deletes a single character                                   |
-| u                              |      | Undo the last operation; `u#` will undo multiple actions     |
-| C-r                            |      | Redo last undo                                               |
-| .                              |      | Repeat the last action                                       |
-| o                              | n    | Insert a new line below                                      |
-| O                              | n    | Insert a new line above                                      |
-| **Searching**                  |      |                                                              |
-| /[keyword]                     |      | Searches forward for the *keyword* in the document           |
-| ?[keyword]                     |      | Searches backwards for the *keyword* in the document         |
-| n                              |      | Searches again *in the direction* of your last search        |
-| N                              |      | Searches again in the opposite direction of your last search |
-| :%s/[pattern]/[replacement]/g  |      | This replaces all occurrences of a pattern without confirming each one |
-| :%s/[pattern]/[replacement]/gc |      | Replaces all occurrences of a pattern and confirms each one  |
-| **Multiple files**             |      |                                                              |
-| :bn                            | n    | Switch to next buffer                                        |
-| :bp                            | n    | Switch to previous buffer                                    |
-| :bd                            | n    | Close a buffer                                               |
-| :sp [filename]                 | n    | Opens a new file and splits your screen horizontally         |
-| :vsp [filename]                | n    | Opens a new file and splits your screen vertically           |
-| :ls                            | n    | Lists all open buffers                                       |
-| <`C-w`>s                       | n    | Split windows horizontally                                   |
-| <`C-w`>v                       | n    | Split windows vertically                                     |
-| <`C-w`>w                       | n    | Switch between windows                                       |
-| <`C-w`>q                       | n    | Quit a window                                                |
-| <`C-w`>h / <`C-w`>l            | n,i  | Moves your cursor to the window to the left/right            |
-| <`C-w`>j / <`C-w`>k            | n,i  | Moves your cursor to the window below/above                  |
-| **Marking Text**               |      |                                                              |
-| v                              | v    | starts visual mode, then select a range of text with hjkl    |
-| V                              | v    | starts linewise visual mode                                  |
-| C-v                            | v    | starts visual block mode (selects columns)                   |
-| ab                             | v    | a block with ()                                              |
-| aB                             | v    | a block with {}                                              |
-| ib                             | v    | inner block with ()                                          |
-| iB                             | v    | inner block with {}                                          |
-| aw                             | v    | mark a word                                                  |
-| Esc                            | v    | exit visual mode                                             |
-| *For selected text*            |      |                                                              |
-| d                              | v    | delete marked text                                           |
-| y                              | v    | yank (copy) marked text                                      |
-| >                              | v    | shift text right                                             |
-| <                              | v    | shift text left                                              |
-| ~                              | v    | swap case (upper or lower)                                   |
-| **Tab pages**                  |      |                                                              |
-| :tabedit file                  |      | opens a new tab and will take you to edit "file"             |
-| gt                             |      | move to the next tab                                         |
-| gT                             |      | move to the previous tab                                     |
-| #gt                            |      | move to a specific tab number #                              |
-| :tabs                          |      | list all tabs                                                |
-| :tabclose                      |      | close a single tab                                           |
+| command / key                                           | mode | description                                                  |
+| ------------------------------------------------------- | ---- | ------------------------------------------------------------ |
+| :help [keyword]                                         |      | Performs a search of help documentation                      |
+| :e [file]                                               |      | Opens a file                                                 |
+| :w                                                      |      | Saves the file you are working on                            |
+| :w [filename]                                           |      | save your file with the name                                 |
+| :wq                                                     |      | Save your file and close Vim                                 |
+| :q!                                                     |      | Quit without first saving the file                           |
+| **MOVEMENT**                                            |      |                                                              |
+| h/l                                                     | n    | Moves the cursor to the left/right                           |
+| j/k                                                     | n    | Moves the cursor up/down one line                            |
+| H                                                       | n    | Puts the cursor at the top of the screen                     |
+| M                                                       | n    | Puts the cursor in the middle of the screen                  |
+| L                                                       | n    | Puts the cursor at the bottom of the screen                  |
+| w                                                       |      | Puts the cursor at the start of the next word                |
+| b                                                       |      | Puts the cursor at the start of the previous word            |
+| e                                                       |      | Puts the cursor at the end of a word                         |
+| O                                                       |      | Places the cursor at the beginning of a line                 |
+| $                                                       |      | Places the cursor at the end of a line                       |
+| )                                                       |      | Takes you to the start of the next sentence                  |
+| (                                                       |      | Takes you to the start of the previous sentence              |
+| }                                                       |      | Takes you to the start of the next paragraph or block of text |
+| {                                                       |      | Takes you to the start of the previous paragraph or block of text |
+| C-f                                                     |      | Takes you one page forward                                   |
+| C-b                                                     |      | Takes you one page back                                      |
+| gg                                                      |      | Places the cursor at the start of the file                   |
+| G                                                       |      | Places the cursor at the end of the file                     |
+| #                                                       |      | takes you to the line specified (#: line number.)            |
+| **Editing**                                             |      |                                                              |
+| a                                                       |      | Append text after the cursor [count] times.                  |
+| A                                                       |      | Append text at the end of the line [count] times.            |
+| i                                                       |      | Insert text before the cursor [count] times.                 |
+| I                                                       |      | Insert text before the first non-blank in the line [count] times. |
+| yy                                                      |      | Copies a line. `5yy` copies 5 lines                          |
+| yw                                                      |      | Copies a word                                                |
+| y$                                                      |      | Copies from cursor to the end of a line                      |
+| v                                                       |      | Highlight one character at a time                            |
+| V                                                       |      | Highlights one line                                          |
+| p                                                       |      | Paste whatever has been copied to the unnamed register       |
+| d                                                       |      | Deletes highlighted text                                     |
+| dd                                                      |      | Deletes a line of text. `5dd` deletes 5 lines from cursor position |
+| dw                                                      |      | Deletes a word                                               |
+| D                                                       |      | Deletes everything from cursor to the end of the line        |
+| d0                                                      |      | Deletes everything from cursor to the beginning of the line  |
+| dgg                                                     |      | Deletes everything from cursor to the beginning of the file  |
+| dG                                                      |      | Deletes everything from cursor to the end of the file        |
+| x                                                       |      | Deletes a single character                                   |
+| u                                                       |      | Undo the last operation; `u#` will undo multiple actions     |
+| C-r                                                     |      | Redo last undo                                               |
+| .                                                       |      | Repeat the last action                                       |
+| o                                                       | n    | Insert a new line below                                      |
+| O                                                       | n    | Insert a new line above                                      |
+| **Searching**                                           |      |                                                              |
+| /[keyword]                                              |      | Searches forward for the *keyword* in the document           |
+| ?[keyword]                                              |      | Searches backwards for the *keyword* in the document         |
+| n                                                       |      | Searches again *in the direction* of your last search        |
+| N                                                       |      | Searches again in the opposite direction of your last search |
+| :[range]s[ubstitute]/{pattern}/{string}/[flags] [count] |      | Find & replace syntax e.g. `:3,10s/foo/bar/g`                |
+| range                                                   |      | `.`: current line, `$`: last line, `+n`: n lines ahead from 1st number, `-n`: n lines backwards from 1st number |
+| flags                                                   |      | `g`: global replace, `c`: confirmation, `i`: case-insensitive, `C`: case match |
+| `\<`foo`\>`                                             |      | Match whole word e.g. `:s/\<foo\>/bar/`                      |
+| :%s/[pattern]/[replacement]/g                           |      | This replaces all occurrences of a regex pattern without confirming each one |
+| :%s/[pattern]/[replacement]/gc                          |      | Replaces all occurrences of a regex pattern and confirms each one |
+| **Multiple files**                                      |      |                                                              |
+| :bn                                                     | n    | Switch to next buffer                                        |
+| :bp                                                     | n    | Switch to previous buffer                                    |
+| :bd                                                     | n    | Close a buffer                                               |
+| :sp [filename]                                          | n    | Opens a new file and splits your screen horizontally         |
+| :vsp [filename]                                         | n    | Opens a new file and splits your screen vertically           |
+| :ls                                                     | n    | Lists all open buffers                                       |
+| <`C-w`>s                                                | n    | Split windows horizontally                                   |
+| <`C-w`>v                                                | n    | Split windows vertically                                     |
+| <`C-w`>w                                                | n    | Switch between windows                                       |
+| <`C-w`>q                                                | n    | Quit a window                                                |
+| <`C-w`>h / <`C-w`>l                                     | n,i  | Moves your cursor to the window to the left/right            |
+| <`C-w`>j / <`C-w`>k                                     | n,i  | Moves your cursor to the window below/above                  |
+| **Marking Text**                                        |      |                                                              |
+| v                                                       | v    | starts visual mode, then select a range of text with hjkl    |
+| V                                                       | v    | starts linewise visual mode                                  |
+| C-v                                                     | v    | starts visual block mode (selects columns)                   |
+| ab                                                      | v    | a block with ()                                              |
+| aB                                                      | v    | a block with {}                                              |
+| ib                                                      | v    | inner block with ()                                          |
+| iB                                                      | v    | inner block with {}                                          |
+| aw                                                      | v    | mark a word                                                  |
+| Esc                                                     | v    | exit visual mode                                             |
+| *For selected text*                                     |      |                                                              |
+| d                                                       | v    | delete marked text                                           |
+| y                                                       | v    | yank (copy) marked text                                      |
+| >                                                       | v    | shift text right                                             |
+| <                                                       | v    | shift text left                                              |
+| ~                                                       | v    | swap case (upper or lower)                                   |
+| **Tab pages**                                           |      |                                                              |
+| :tabedit file                                           |      | opens a new tab and will take you to edit "file"             |
+| gt                                                      |      | move to the next tab                                         |
+| gT                                                      |      | move to the previous tab                                     |
+| #gt                                                     |      | move to a specific tab number #                              |
+| :tabs                                                   |      | list all tabs                                                |
+| :tabclose                                               |      | close a single tab                                           |
+
+### Examples
+
+#### Find and Replace
+
+Comment lines (add `#` before the line) from 5 to 20:
+
+```vi
+:5,20s/^/#/
+```
+
+Uncomment lines from 5 to 20, revert the previous changes:
+
+```vi
+:5,20s/^#//
+```
+
+Uncomment current line and 4 lines after this (5 in total, starting from current):
+
+```vi
+:.,+4s/^#//
+```
+
+Replace all instances of ‘apple’, ‘orange’, and ‘mango’ with ‘fruit’:
+
+```vi
+:%s/apple\|orange\|mango/fruit/g
+```
+
+Remove trailing whitespace at the end of each line:
+
+```vi
+:%s/\s\+$//e
+```
 
 
 
