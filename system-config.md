@@ -1,5 +1,7 @@
 # System Configuration Cheat-sheet
 
+## Contents
+
 [TOC]
 
 
@@ -237,7 +239,40 @@ The solution for this "dummy output" regression is to:
 
 ## System Configuration
 
-### update-alternatives
+
+
+### `pkg-config`
+
+`pkg-config` return meta-information about installed libraries. It's used to retrieve information about installed  libraries  in the  system.  It is typically used to compile and link against one or more libraries.
+
+`pkg-config` defines and supports a unified interface for querying installed libraries for the purpose of compiling software that depends on them. It allows programmers and installation scripts to work without explicit knowledge of detailed library path information. 
+
+`pkg-config` retrieves information about packages from special  metadata  files.  These files  are  named  after the package, and has a `.pc` extension.  On most systems, `pkg-config` looks in `/usr/lib/pkgconfig`, `/usr/share/pkgconfig`, `/usr/local/lib/pkgconfig` and  `/usr/local/share/pkgconfig`  for  these  files.  It will additionally look in the colon-separated (on Windows, semicolon-separated) list of  directories  specified  by the `PKG_CONFIG_PATH` environment variable.
+
+Here is an example `.pc` file for [libpng](https://en.wikipedia.org/wiki/Libpng):
+
+```
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${exec_prefix}/include
+ 
+Name: libpng
+Description: Loads and saves PNG files
+Version: 1.2.8
+Libs: -L${libdir} -lpng12 -lz
+Cflags: -I${includedir}/libpng12
+```
+
+For example, when compiling a program with `libpng`:
+
+```sh
+gcc -o test test.c $(pkg-config --libs --cflags libpng)
+```
+
+[Ref#2,3,4](#References)
+
+### `update-alternatives`
 
 #### --config `<name>`
 
@@ -322,10 +357,119 @@ User Unit Search Path
 
 
 
-### Network-manager
+### Network Administration
+
+#### Network-manager
 
 ```
 Dec  8 01:06:21 pop-os systemd-resolved[794]: Failed to send hostname reply: Invalid argument
+```
+
+#### DHCP lease renewal
+
+Using `dhclient`
+
+```sh
+sudo dhclient -r eth0
+sudo dhclient eth0
+```
+
+Using services
+
+```sh
+sudo ifdown eth0
+sudo ifup eth0
+### RHEL/CentOS/Fedora specific command ###
+sudo /etc/init.d/network restart
+### Debian / Ubuntu Linux specific command ###
+sudo /etc/init.d/networking restart
+### Systemd specific command ###
+sudo systemctl restart networking.service
+```
+
+Using `nmcli`
+
+```sh
+nmcli con
+nmcli con down id 'home_wifi'
+nmcli con up id 'home_wifi'
+```
+
+
+
+#### SAMBA Share
+
+
+
+Samba variables
+
+| Variable                | Definition                                                   |
+| ----------------------- | ------------------------------------------------------------ |
+| **Client variables**    |                                                              |
+| `%a`                    | Client’s architecture (see [Table 4-1](https://www.oreilly.com/library/view/using-samba-3rd/0596007698/ch04.html#samba3-CHP-4-TABLE-1)) |
+| `%i`                    | IP address of the interface on the server to which the client connected |
+| `%I`                    | Client’s IP address (e.g., 172.16.1.2)                       |
+| `%m`                    | Client’s NetBIOS name                                        |
+| `%M`                    | Client’s DNS name (defaults to the value of `%I` if `hostname lookups = no`) |
+| User variables          |                                                              |
+| `%u`                    | Current Unix username (requires a connection to a share)     |
+| `%U`                    | Username transmitted by the client in the initial authentication request |
+| `%D`                    | User’s domain (e.g., the string `DOM-A` in DOM-A\user)       |
+| `%H`                    | Home directory of `%u`                                       |
+| `%g`                    | Primary group of `%u`                                        |
+| `%G`                    | Primary group of `%U`                                        |
+| Share variables         |                                                              |
+| `%S`                    | Current share’s name                                         |
+| `%P`                    | Current share’s root directory                               |
+| `%p`                    | Automounter’s path to the share’s root directory, if different from `%P` |
+| Server variables        |                                                              |
+| `%d`                    | Current server process ID                                    |
+| `%h`                    | Samba server’s DNS hostname                                  |
+| `%L`                    | Samba server’s NetBIOS name sent by the client in the NetBIOS session request |
+| `%N`                    | Home directory server, from the automount map                |
+| `%v`                    | Samba version                                                |
+| Miscellaneous variables |                                                              |
+| `%R`                    | The SMB protocol level that was negotiated                   |
+| `%T`                    | The current date and time                                    |
+| `%$(`**`var`**`)`       | The value of environment variable *`var`*                    |
+
+Create a system user to manage Samba service:
+
+```sh
+sudo groupadd --system smbgroup
+sudo useradd --system --no-create-home --group smbgroup -s /bin/false smbuser
+sudo chown -R smbuser:smbgroup /media/NAS/share
+sudo chmod -R g+w /media/NAS/share
+```
+
+A sample standalone network share configuration:
+
+```toml
+[global]
+        log file = /var/log/samba/%m
+        log level = 1
+        server role = standalone server
+
+[demo]
+        # This share requires authentication to access
+        path = /srv/samba/demo/
+        read only = no
+        # Accessible by only smbgroup members 
+        valid users = @smbgroup
+        inherit permissions = yes
+
+```
+
+Now check an `smb.conf` configuration file for internal correctness:
+
+```sh
+testparm
+```
+
+After changing the configuration file, a service restart is in order:
+
+```sh
+sudo systemctl restart smbd
 ```
 
 
@@ -333,4 +477,6 @@ Dec  8 01:06:21 pop-os systemd-resolved[794]: Failed to send hostname reply: Inv
 ## References
 
 1. [thinkwiki: How to configure acpid](https://www.thinkwiki.org/wiki/How_to_configure_acpid)
-2. 
+2. `pkg-config` manual page
+3. [pkg-config](https://en.wikipedia.org/wiki/Pkg-config) on Wikipedia
+4. [Tutorialspoint article](https://www.tutorialspoint.com/unix_commands/pkg-config.htm)

@@ -7,6 +7,19 @@
 - [Docker Basics](#Docker-Basics)
     - [Docker Images](#Docker-Images)
     - [Container Life-cycle](#Container Life-cycle)
+        - [Run Interactively](#Run-Interactively)
+        - [Stop](#Stop)
+        - [List](#List)
+        - [Inspect](#Inspect)
+        - [Log](#Log)
+        - [Remove](#Remove)
+        - [Add Aliases](#Add-Aliases)
+        - [Run detached](#Run-detached)
+        - [Start a stopped container](#Start-a-stopped-container)
+        - [Execute commands in a container](#Execute-commands-in-a-container)
+        - [Run with remove on exit](#Run-with-remove-on-exit)
+        - [List dangling images](#List-dangling-images)
+        - [Remove dangling images/containers/networks/volumes](#Remove-dangling-images/containers/networks/volumes)
 - [Dockerfile](#Dockerfile)
     - [Syntax](#Syntax)
     - [`.dockerignore` file](#-file)
@@ -184,7 +197,7 @@ docc start -a myAlpine
 
 #### Execute commands in a container
 
-We can even execute a new process in the container.
+We can even execute a new process in the container or open an interactive session with a detached conatainer.
 
 ```sh
 docc exec -it myAlpine /bin/sh

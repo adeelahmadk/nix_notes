@@ -17,6 +17,8 @@ This document is a reference for a beginner. It's by no means an exhaustive list
 
 - [Setting up SSH access](#Setting-up-SSH-access)
 
+    - [Changing Remote repository's URL](#Changing-Remote-repository's-URL)
+
 - [Configure multiple Versioning Hosts](#Configure-multiple-Versioning-Hosts)
 
 - [Push to upstream repo cloned prior to ssh key setup](#Push-to-upstream-repo-cloned-prior-to-ssh-key-setup)
@@ -72,6 +74,22 @@ git config --global --list
 
 
 
+### Setting your commit email address
+
+To globally set commit email
+
+```sh
+git config --global user.email "email@example.com"
+```
+
+For an individual repository, change the current working directory to the local repository and use following command
+
+```sh
+git config user.email "email@example.com"
+```
+
+
+
 ## States in which file might exist
 
 | State | Description |
@@ -116,7 +134,7 @@ Automatically notice any modified (but not new) files, add them to the index, an
 ```sh
 git commit -am "commit message"
 ```
-Add a remote repo before pushing to it:
+Add a **remote repo** before pushing to it:
 ```sh
 git remote add origin https://github.com/username/testrepo.git
 ```
@@ -234,7 +252,7 @@ guide, and code of conduct for contributors.
 Closes #9
 ```
 
-If you use Vim or Neovim, and you want to speed up the process even more, you can add this to your git config:
+If you use `vim` or `neovim`, and you want to speed up the process even more, you can add this to your git configuration:
 
 ```sh
 # Neovim
@@ -244,7 +262,7 @@ git config --global core.editor "nvim +16 -c 'startinsert'"
 git config --global core.editor "vim +16 +startinsert"
 ```
 
-This sets the default editor to Neovim (or Vim), and places the cursor on line 16 in Insert Mode as soon the editor opens. 
+This sets the default editor to `neovim` (or `vim`), and places the cursor on line 16 in Insert Mode as soon the editor opens. 
 
 **Credit**: [Keeping Git Commit Messages Consistent with a Custom Template by Timothy Merritt](https://dev.to/timmybytes/keeping-git-commit-messages-consistent-with-a-custom-template-1jkm)
 
@@ -284,7 +302,10 @@ Before switching remote URLs, list
 git remote -v
 ```
 
+### Changing Remote repository's URL
+
 Change to HTTPS
+
 ```sh
 git remote set-url origin https://github.com/USERNAME/OTHERREPOSITORY.git
 ```
@@ -396,6 +417,30 @@ Change your `remote`'s URL to SSH
 git remote set-url origin git@github.com:USERNAME/OTHERREPOSITORY.git
 ```
 
+Renaming a remote repository
+
+```sh
+$ git remote -v
+# View existing remotes
+$ git remote rename origin destination
+# Change remote name from 'origin' to 'destination'
+$ git remote -v
+# Verify remote's new name
+```
+
+Use the git remote rm command to remove a remote URL from your repository. It takes a `remote` name as argument:
+
+```sh
+$ git remote rm destination
+# Remove remote
+$ git remote -v
+# Verify it's gone
+```
+
+**Note:** `git remote rm` does not delete the remote repository from the server. It simply removes the remote and its references from your local repository.
+
+[Ref: Managing remote repositories](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories)
+
 ### Remove a file from Staging or Commit
 
 To remove from staging, we can use following command:
@@ -432,11 +477,11 @@ git pull origin master
 
 ### Viewing project history
 
-At any point view the history of your changes:
+At any point view the commit history of your changes:
 ```sh
 git log
 ```
-See complete `diff` at each step:
+See complete `diff` (the patch output) at each step:
 ```sh
 git log -p
 ```
@@ -444,6 +489,8 @@ Overview of the change is useful to get a feel of each step:
 ```sh
 git log --stat --summary
 ```
+
+[Ref: git-scm Viewing the Commit History](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History)
 
 ### Branches
 

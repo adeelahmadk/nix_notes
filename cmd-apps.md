@@ -1,5 +1,17 @@
 # Command-line (CLI/Terminal) Applications
 
+## Contents
+
+1. [Document Processing](#Document-Processing)
+2. [Desktop Integration](#Desktop-Integration)
+3. [System & Network](#System-&-Network)
+4. [Distributed, Web & Data intensive](#Distributed-Web-&-Data-intensive)
+5. [Multimedia Processing](#Multimedia-Processing)
+6. [Running applications](#Running-applications)
+7. [Virtual Machine Management](#Virtual-Machine-Management)
+    1. [KVM](#KVM)
+    2. [VBox](#VBox)
+
 
 
 ## Document Processing
@@ -55,6 +67,44 @@ pandoc -t rst myFile.html -o myFile.rst
 ```
 
 
+
+### Browsers, File Managers
+
+#### Lynx
+
+
+
+#### Ranger
+
+Ranger is a console file manager with VI key bindings written in Python. Directories are displayed in one pane with three columns. Moving between them is accomplished with keystrokes, bookmarks, the mouse or the command history. File previews and directory contents show automatically for the current selection.
+
+It stores configuration files and plug-ins in `~/.config/ranger` and cache files in `~/.cache/ranger`. A sample of the default configuration file `rc.conf` is like:
+
+```
+set preview_images true
+
+set preview_images_method ueberzug
+
+default_linemode devicons
+
+set show_hidden true
+```
+
+Ranger requires a utility to enable image previews in CLI. Most successful one, of the lot available, is `ueberzug`. `Überzug` is a command line utility which allows to draw images on terminals by using child windows. It can be installed using `pip`:
+
+```sh
+pip install ueberzug
+```
+
+Another key file `/usr/share/doc/ranger/config/scope.sh` contains definitions for styles, environment vars and behaviors (like highlight colors, file type dependent preview, icons etc.). To modify such parameters copy this file to `~/.config/ranger` and edit accordingly.
+
+##### References
+
+- [GitHub page](https://ranger.github.io/)
+- [Integration with neovim](https://www.chrisatmachine.com/Neovim/07-ranger/)
+- [GitHub: ueberzug](https://github.com/seebye/ueberzug)
+- [Ranger Wiki](https://github.com/ranger/ranger/wiki)
+- [Ranger at ArchWiki](https://wiki.archlinux.org/title/Ranger)
 
 ### Process HTML/XML Files (html-xml-utils)
 
@@ -205,7 +255,7 @@ Ubuntu Archive Mirror reporting tool for apt sources configuration.
 
 
 
-## Distributed,  Web & Data intensive
+## Distributed, Web & Data intensive
 
 ### Weather & Forecast: `weather-util`
 
@@ -305,24 +355,24 @@ You can burn text subtitles (hardsubs) with one of two filters: `subtitles` or `
   If the subtitle is a separate file called `subtitle.srt`, you can use this command:
 
 	```sh
-ffmpeg -i video.avi -vf subtitles=subtitle.srt out.avi
+	ffmpeg -i video.avi -vf subtitles=subtitle.srt out.avi
 	```
-If the subtitle is embedded in the container `video.mkv`, you can do this:
+	If the subtitle is embedded in the container `video.mkv`, you can do this:
 	```sh
-ffmpeg -i video.mkv -vf subtitles=video.mkv out.avi
+	ffmpeg -i video.mkv -vf subtitles=video.mkv out.avi
 	```
 - `ass` filter
-Same as the subtitles filter, except that it doesn’t require `libavcodec` and `libavformat` to work (requires `ffmpeg` to be compiled with `--enable-libass`). It is limited to ASS (Advanced Substation Alpha) subtitles files.
+	Same as the subtitles filter, except that it doesn’t require `libavcodec` and `libavformat` to work (requires `ffmpeg` to be compiled with `--enable-libass`). It is limited to ASS (Advanced Substation Alpha) subtitles files.
 	```sh
-ffmpeg -i video.avi -vf "ass=subtitle.ass" out.avi
+	ffmpeg -i video.avi -vf "ass=subtitle.ass" out.avi
 	```
 - Transcode subtitles:
 	```sh
-ffmpeg -i subtitle.vtt subtitle.srt
+	ffmpeg -i subtitle.vtt subtitle.srt
 	```
-If your subtitle is in SubRip, MicroDVD or any other supported text subtitles, you have to convert it to ASS before using this filter:
+	If your subtitle is in SubRip, MicroDVD or any other supported text subtitles, you have to convert it to ASS before using this filter:
 	```sh
-ffmpeg -i subtitle.srt subtitle.ass
+	ffmpeg -i subtitle.srt subtitle.ass
 	```
 
 #### Examples
@@ -553,13 +603,158 @@ firefox --new-tab --search "linux add user to group" &
 firefox --private-window &
 ```
 
+
+
 ## Virtual Machine Management
+
+### KVM
+
+#### Dependencies
+
+- isc-dhcp-client / dhclient
+- netcat-openbsd
+- virt-viewer
+- libvirt-daemon, libvirt-daemon-system, libvirt-daemon-driver-qemu
+- libvirt0:amd64, libvirt-glib-1.0-0:amd64, libvirt-clients
+- qemu
+- dnsmasq-base
+- dmidecode
+- ebtables
+- virt-install
+- virt-manager
+- bridge-utils
+
+To check for the installed dependencies:
+
+```sh
+dpkg --get-selections | grep -i "qemu\|netcat\|dhcp-client\|dnsmasq\|dmidecode\|virt\|bridge"
+```
+
+To install
+
+```sh
+sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system virtinst bridge-utils
+```
+
+#### Setup
+
+You can create a VM from CLI or `virt-manager`.
+
+```sh
+virt-install \
+  --name ubuntu2004 \
+  --ram 2048 \
+  --disk path=/var/lib/libvirt/images/u20.qcow2,size=8 \
+  --vcpus 1 \
+  --os-type linux \
+  --os-variant generic \
+  --console pty,target_type=serial \
+  --cdrom /var/lib/libvirt/isos/ubuntu-20.04.2-live-server-amd64.iso
+```
+
+As it can be seen in the previous command, the default image store is in `/var/lib/libvirt/images`.
+
+#### Clone VM
+
+A user can create a “base image” and use `virt-clone` to stamp out many instances of it. You can run a clone as follows.
+
+```sh
+virt-clone \
+  --original ubuntu18.04 \
+  --name cloned-ubuntu \
+  --file /var/lib/libvirt/images/cu.qcow2
+```
+
+
+
+#### Headless Management
+
+`virsh` management user interface can be used to interact with virtual guest domains. It currently supports Xen,  QEMU,  KVM, LXC, OpenVZ, VirtualBox and VMware ESX.
+
+##### Start VMs
+
+To start a VM, run:
+
+```sh
+virsh start Ubuntu-18.04
+```
+
+You can also use the VM's ID to start it:
+
+```sh
+virsh start 2
+```
+
+##### Restart VMs
+
+To restart a running VM, do:
+
+```sh
+virsh reboot Ubuntu-18.04
+```
+
+Or,
+
+```sh
+virsh reboot 2
+```
+
+##### Pause VMs
+
+To pause a running VM, do:
+
+```sh
+virsh suspend Ubuntu-18.04
+```
+
+Or,
+
+```sh
+virsh suspend 2
+```
+
+##### Resume VMs
+
+To resume a suspended VM, do:
+
+```sh
+virsh resume Ubuntu-18.04
+```
+
+Or,
+
+```sh
+virsh resume 2
+```
+
+##### Shutdown VMs
+
+To power off a running VM, do:
+
+```sh
+virsh shutdown Ubuntu-18.04
+```
+
+Or,
+
+```sh
+virsh shutdown 2
+```
+
+
+
+#### References
+
+1. [Octetz: Linux Hypervisor Setup (libvirt/qemu/kvm)](https://octetz.com/docs/2020/2020-05-06-linux-hypervisor-setup/)
+2. [YouTube: Dicussion and tutorial for Linux Hypervisor Setup](https://www.youtube.com/watch?v=HfNKpT2jo7U)
+3. [OStechnix: Install & configure headless server in KVM](https://ostechnix.com/install-and-configure-kvm-in-ubuntu-20-04-headless-server/)
 
 ### VBox
 
 - Resize the virtual disk to 81920 MB (80 GB):
 
 	```sh
-VBoxManage modifyhd “C:\Users\Chris\VirtualBox VMs\Windows 7\Windows 7.vdi” --resize 81920
+	VBoxManage modifyhd “C:\Users\Chris\VirtualBox VMs\Windows 7\Windows 7.vdi” --resize 81920
 	```
 
+[Top](#Contents)
