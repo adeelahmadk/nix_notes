@@ -26,24 +26,22 @@ This document is a reference for a beginner. It's by no means an exhaustive list
 - [Regular work-flow maintenance](#Regular-work-flow-maintenance)
 
     - [Connect/View/Change remote repository](#Connect-View-Change-remote-repository)
-
     - [Remove a file from Staging or Commit](#Remove-a-file-from-Staging-or-Commit)
-
     - [Push/Pull Repos](#Push-Pull-Repos)
-
     - [Viewing project history](#Viewing-project-history)
-
     - [Branches](#Branches)
 
         - [Renaming the default branch (master)](#Renaming-the-default-branch)
-
     - [Tags](#Tags)
-
     - [Sync with upstream changes](#Sync-with-upstream-changes)
-
     - [Git Clone](#Git-Clone)
 
-        
+- [Miscellaneous](#Miscellaneous)
+
+  - [Add all except some files](#Add-all-except-some-files)
+  - [Sparse Clone: clone only some sub directories](#Sparse-Clone:-clone-only-some-sub-directories)
+  
+  ​    
 
 ## Configuration
 
@@ -713,4 +711,118 @@ Alternatively, you can specify the `--depth` option which limits the number of c
 ```sh
 git clone -b <tagname> --depth 1 <repository> .
 ```
+
+
+
+## Miscellaneous
+
+### Add all except some files
+
+```sh
+git add --all -- ':!path/to/file1.txt' ':!path/to/file2.txt' ':!path/to/folder1/*'
+
+# or:
+git add -- . -- ':!path/to/file1.txt' ':!path/to/file2.txt' ':!path/to/folder1/*'
+```
+
+You can also use this syntax to specify wild-card patterns for matching files/folders. For example, the following includes all `.js` files but excludes all `.spec.js` files:
+
+```sh
+git add -- '*.js' -- ':(exclude)*.spec.js'
+
+# or, shorthand:
+git add -- '*.js' -- ':!*.spec.js'
+```
+
+[How to Add All Files to a Git Commit Except Some?](https://www.designcise.com/web/tutorial/how-to-add-all-files-to-a-git-commit-except-some)
+
+### Sparse Clone: clone only some sub directories
+
+```sh
+# prepare a directory for the repo
+mkdir <repo>
+cd <repo>
+git init
+git remote add -f origin <url>
+# setup for a sparse checkout (i.e. some of the subtree)
+git config core.sparseCheckout true
+# list the sparse dir tree in .git/info/sparse-checkout
+echo "some/dir/" >> .git/info/sparse-checkout
+echo "another/sub/tree" >> .git/info/sparse-checkout
+# pull the repo
+git pull origin master
+```
+
+As a shell function:
+
+```sh
+ # As a function:
+
+function git_sparse_clone() {
+	[ "$#" -lt 3 ] && echo "Usage: git_sparse_clone <url> <locdir> <subdir> [<subdir> ...]" >&2 && return 2
+  rurl="$1" localdir="$2" && shift 2
+
+  mkdir -p "$localdir" && cd "$localdir"
+
+  git init
+  git remote add -f origin "$rurl"
+
+  git config core.sparseCheckout true
+
+  # Loop over remaining args
+  for i; do
+    echo "$i" >> .git/info/sparse-checkout
+  done
+
+  git pull origin master
+}
+
+# Usage:
+
+git_sparse_clone "http://github.com/tj/n" "./local/location" "/bin"
+```
+
+As of git 2.25.0 (Jan 2020) an experimental sparse-checkout command is added in git: 
+
+```sh
+git sparse-checkout init
+# same as: git config core.sparseCheckout true
+
+git sparse-checkout set "A/B"
+# same as: echo "A/B" >> .git/info/sparse-checkout
+
+git sparse-checkout list
+# same as: cat .git/info/sparse-checkout
+```
+
+shell function for git >= 2.25.0:
+
+```sh
+ # As a function:
+
+function git_sparse_clone() {
+	[ "$#" -lt 3 ] && echo "Usage: git_sparse_clone <url> <locdir> <subdir> [<subdir> ...]" >&2 && return 2
+  rurl="$1" localdir="$2" && shift 2
+
+  mkdir -p "$localdir" && cd "$localdir"
+
+  git init
+  git remote add -f origin "$rurl"
+
+  git sparse-checkout init
+
+  # Loop over remaining args
+  for i; do
+    git sparse-checkout "$i"
+  done
+
+  git pull origin master
+}
+
+# Usage:
+
+git_sparse_clone "http://github.com/tj/n" "./local/location" "/bin"
+```
+
+
 

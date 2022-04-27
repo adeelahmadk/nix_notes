@@ -4,7 +4,9 @@
 
 ## Filters
 
-### more
+### Pagers
+
+#### more
 
 **`more [-dlfpcsu] [-num] [+/pattern] [+linenum] [file ...]`**
 
@@ -23,11 +25,11 @@ More is a filter for paging through text one screen-full at a time.
 | `+/`   | The +/ option specifies a string that will be searched for before each file is displayed. |
 | `+num` | Start at line number num. |
 
-### less - opposite of more
+#### less - opposite of more
 
 Less is a program similar to more (1), but which allows backward movement in the file as well as forward movement.
 
-### zless
+#### zless
 
 Usage: **`/bin/zless [OPTION]... [FILE]...`**
 Like 'less', but operate on the uncompressed contents of any compressed FILEs. Options are the same as for 'less'.
@@ -90,7 +92,10 @@ Print the last 10 lines of each FILE to standard output.
 
 ## Text Processing
 
-### grep
+### Searching
+
+#### grep
+
 **`grep [OPTION]... PATTERN [FILE]...`**
 
 Search for PATTERN in each FILE or standard input. PATTERN is, by default, a basic regular expression (BRE).
@@ -116,7 +121,7 @@ Example: `grep -i 'hello world' menu.h main.c`
 | `-s`, `--no-messages` | suppress error messages |
 | `-v`, `--invert-match` | select non-matching lines |
 
-#### Examples
+##### Examples
 Search for a VGA or 3D Controller in the ouput of previous command on stdin:
 ```sh
 sudo lspci -nn | grep -i 'vga\|3d[ A-Za-z0-9]*controller'
@@ -127,9 +132,177 @@ Search for storage devices `sda`,`sdb`,... or `hda`,`hdb`,... in kernel message 
 ```sh
 sudo dmesg | egrep '(s|h)d[a-z]'
 ```
+Miscellaneous examples:
+
+```sh
+# To search a file for a pattern:
+grep <pattern> <file>
+
+# To perform a case-insensitive search (with line numbers):
+grep -in <pattern> <file>
+
+# To recursively grep for string <pattern> in <dir>:
+grep -R <pattern> <dir>
+
+# Read search patterns from a file (one per line):
+grep -f <pattern-file> <file>
+
+# Find lines NOT containing pattern:
+grep -v <pattern> <file>
+
+# To grep with regular expressions:
+grep "^00" <file>    # Match lines starting with 00
+grep -E "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" <file> # Find IP add
+
+# To find all files that match <pattern> in <dir>
+grep -rnw <dir> -e <pattern>
+
+# To exclude grep from your grepped output of ps:
+# (Add [] to the first letter. Ex: sshd -> [s]shd)
+ps aux | grep '[h]ttpd'
+
+# Colour in red {bash} and keep all other lines
+ps aux | grep -E --color 'bash|$'
+
+# extract text between two words
+# Case: single line
+grep -o -P '(?<=<PRE>).*(?=</PRE>)' input.html
+# Case: multiline
+grep -z -o -P '(?<=<PRE>)(?s).*(?=</PRE>)' input
+
+```
+
 For more examples, refer to the [shell script](sh-script.md) reference.
 
+#### ripgrep
+
+```sh
+# ripgrep
+# A recursive line-oriented CLI search tool.
+# Aims to be a faster alternative to `grep`.
+# More information: <https://github.com/BurntSushi/ripgrep>.
+
+# Recursively search the current directory for a regex pattern:
+rg pattern
+
+# Search for pattern including all .gitignored and hidden files:
+rg -uu pattern
+
+# Search for a pattern only in a certain filetype (e.g., html, css, etc.):
+rg -t filetype pattern
+
+# Search for a pattern only in a subset of directories:
+rg pattern set_of_subdirs
+
+# Search for a pattern in files matching a glob (e.g., `README.*`):
+rg pattern -g glob
+
+# Only list matched files (useful when piping to other commands):
+rg --files-with-matches pattern
+
+# Show lines that do not match the given pattern:
+rg --invert-match pattern
+
+# Search a literal string pattern:
+rg -F string
+```
+
+
+
+#### ag - The Silver Surfer
+
+```sh
+# ag
+# The Silver Searcher. Like ack, but aims to be faster.
+# More information: <https://github.com/ggreer/the_silver_searcher>.
+
+# Find files containing "foo", and print the line matches in context:
+ag foo
+
+# Find files containing "foo" in a specific directory:
+ag foo path/to/directory
+
+# Find files containing "foo", but only list the filenames:
+ag -l foo
+
+# Find files containing "FOO" case-insensitively, and print only the match, rather than the whole line:
+ag -i -o FOO
+
+# Find "foo" in files with a name matching "bar":
+ag foo -G bar
+
+# Find files whose contents match a regular expression:
+ag '^ba(r|z)$'
+
+# Find files with a name matching "foo":
+ag -g foo
+```
+
+
+
+#### fzf
+
+```sh
+# fzf
+# Command line fuzzy finder.
+# More information: <https://github.com/junegunn/fzf>.
+
+# Start finder on all files from arbitrary locations:
+find path/to/search -type f | fzf
+
+# Start finder on running processes:
+ps aux | fzf
+
+# Select multiple files with `Shift + Tab` and write to a file:
+find path/to/search_files -type f | fzf -m > filename
+
+# Start finder with a given query:
+fzf -q "query"
+
+# Start finder on entries that start with core and end with either go, rb, or py:
+fzf -q "^core go$ | rb$ | py$"
+
+# Start finder on entries that not match pyc and match exactly travis:
+fzf -q "!pyc 'travis"
+```
+
+
+
+### Record Processing
+
+#### `awk`
+
+
+
+##### Examples
+
+```shell
+# print lines between line number 4 & 11
+awk 'NR>4&&NR<11' file.txt
+
+# extract multiline text data between two words/tokens (inclusive)
+awk '/<PRE>/,/<\/PRE>/' input.html
+apt-cache show g++ | awk '/Description.*:/, /Description-md5/'
+```
+
+
+
+#### `sed`
+
+
+
+##### Examples
+
+```sh
+# extract multiline text data between two words/tokens (inclusive)
+sed -n "/<PRE>/,/<\/PRE>/p" input.html
+
+```
+
+
+
 ### cut
+
 **`cut OPTION... [FILE]...`**
 
 Print selected parts of lines from each FILE to standard output. With no FILE, or when FILE is -, read standard input.
@@ -341,6 +514,7 @@ Options:
 | -s [+][-]seek |  start at <seek> bytes abs. (or +: rel.) infile offset. |
 | -u | use upper case hex letters. |
 | -v | show version: "xxd V1.10 27oct98 by Juergen Weigert". |
+
 
 
 ## File/Directory Processing
@@ -689,6 +863,39 @@ Mandatory arguments to long options are mandatory for short options too.
 
 Note that the -d and -t options accept different time-date formats.
 
+
+
+## Dev Env
+
+### Compile
+
+#### gcc
+
+#### clang
+
+### build
+
+#### make
+
+#### cmake
+
+### debug, optimize, profile
+
+#### gdb
+
+#### strace
+
+#### watch
+
+
+
+## Services
+
+### smbpasswd
+
+### pdbedit
+pdbedit - manage the SAM database (Database of Samba Users)
+    sudo pdbedit -L -v
 ### Copy standard input to file(s): tee
 
 **`tee [OPTION]... [FILE]...`**
@@ -1197,7 +1404,15 @@ Some advanced examples are:
 useradd -m -d /var/www/rami -s /bin/bash -c "Robotic Club Head" -U rami
 # Add a User without Home Directory, No Shell, No Group and Custom Comment
 useradd -M -N -r -s /bin/false -c "Disabled Member" mamnu
+# Add a group then add a user as it's member
+sudo groupadd -g 1010 git && sudo useradd -m -d /data/git -u 1010 -g 1010 git
 ```
+
+References:
+
+[How to Add User to Group in Linux](https://linuxize.com/post/how-to-add-user-to-group-in-linux/)
+
+[How to create users in Linux](https://linuxize.com/post/how-to-create-users-in-linux-using-the-useradd-command/)
 
 
 
@@ -1482,9 +1697,41 @@ sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
 
 Above command relies on package repository maintainers uploading their public keys to the **Ubuntu** *keyserver*, resort to the original `apt-key add ` command if they don't.
 
+
+
+#### `apt-mark`
+It's a utility to change the status of installed packages.
+
+##### Mark a package as automatically installed:
+```sh
+sudo apt-mark auto package_name
+```
+
+##### Hold a package at its current version and prevent updates to it:
+```sh
+sudo apt-mark hold package_name
+```
+
+##### Allow a package to be updated again:
+```sh
+sudo apt-mark unhold package_name
+```
+
+##### Show manually installed packages:
+```sh
+apt-mark showmanual
+```
+
+##### Show held packages that aren't being updated:
+```sh
+apt-mark showhold
+```
+
+
+
 ### Backup & Archiving
 
-#### dd
+#### `dd`
 
 Copy a file, converting and formatting according to the operands.
 
@@ -1592,7 +1839,9 @@ Each process has three sets of capabilities — **inheritable**, **permitted** a
 
 ## Network Administration
 
-### `ip`
+### Configuration
+
+#### `ip`
 
 
 
@@ -1619,4 +1868,77 @@ ip addr show | grep -Po --regexp "(?<=inet ).*(?=/[0-9]+ brd)"
 # active & up iface:
 ip link | grep " UP " | grep -Po --regexp "(?<=[0-9]: ).*(?=: <)"
 ```
+
+
+
+#### `dhclient`
+
+The Internet Systems Consortium DHCP Client, dhclient, provides a means for  configuring  one  or  more  network  interfaces using the Dynamic Host Configuration Protocol, BOOTP protocol, or if these protocols fail, by statically assigning an address.
+
+A DHCP client may request an address from this pool, and then use it on a temporary basis for  communication  on network. The  DHCP protocol also provides a mechanism whereby a client can learn important details about the network to which it is attached, such as the location of a default router, the location of a name server, and so on.
+
+| Option                      | Description                                                  |
+| --------------------------- | ------------------------------------------------------------ |
+| -4                          | Use the DHCPv4 protocol to obtain an IPv4 address and configuration parameters. This is the default and cannot be combined with -6. |
+| -6                          | Use the DHCPv6 protocol to obtain whatever IPv6 addresses are available along with configuration parameters. It cannot be combined with -4. The -S -T -P -N and -D arguments provide more control over aspects of the DHCPv6 processing. |
+| -4o6 port                   | Participate in the DHCPv4 over DHCPv6 protocol specified by RFC 7341.  This associates a DHCPv4 and a DHCPv6 client to allow the v4 client  to  send  v4  requests  encapsulated  in a v6 packet.  Communication between the two clients is done on a pair of UDP sockets bound to ::1 port and port + 1. Both clients must be launched using the same port argument. |
+| -1                          | Try to get a lease once.  On failure exit with code 2.       |
+| -d                          | Force  dhclient  to run as a foreground process.             |
+| -nw                         | Become  a  daemon  immediately (nowait) rather than waiting until an IP address has been acquired. |
+| -q                          | Be quiet at startup, this is the default.                    |
+| -v                          | Enable verbose log messages.                                 |
+| -w                          | Continue running even if no broadcast interfaces  were  found.   Normally  DHCP client will exit if it isn't able to identify any network interfaces to configure. |
+| -n                          | Do  not configure any interfaces.  This is most likely to be useful in combination with the -w flag. |
+| -e VAR=value                | Define additional environment variables for  the  environment  where  dhclient-script executes. |
+| -r                          | Release  the  current  lease  and  stop  the  running DHCP client as previously recorded in the PID file. |
+| -x                          | Stop the running DHCP client without releasing the current lease. |
+| -p port-number              | The  UDP  port  number on which the DHCP client should listen and transmit.  If unspecified, dhclient uses the default port of 68. |
+| -s server-addr              | Specify the server IP address or fully qualified domain name to use as a destination for DHCP protocol messages before dhclient has acquired an  IP  address. |
+| -i                          | Use  a DUID with DHCPv4 clients.  If no DUID is available in the lease file one will be constructed and saved.  The DUID will be used to  construct  a  RFC4361 style client id that will be included in the client's messages.  This client id can be overridden by setting a client id in the configuration file.  Overriding the client id in this fashion is discouraged. |
+| -I                          | Use the standard DDNS scheme from RFCs 4701 & 4702.          |
+| --decline-wait-time seconds | Specify  the  time (in seconds) that an IPv4 client should wait after declining an address before issuing a discover.  The default is 10 seconds as recommended by RFC 2131, Section 3.1.5.  A value of zero equates to no wait at all. |
+| DHCPv6 mode options         |                                                              |
+| -S                          | Use  Information-request  to get only stateless configuration parameters (i.e., without address).  This implies -6.  It also doesn't rewrite  the  lease  database. |
+| -T                          | Ask  for  IPv6  temporary  addresses, one set per -T flag.  This implies -6 and also disables the normal address query. |
+| -P                          | Enable IPv6 prefix delegation.                               |
+| -R                          | Require that responses include all of the items requested by any -N, -T, or -P options. |
+| -N                          | Restore  normal address query for IPv6. This implies -6.  It is used to restore normal operation after using -T or -P.  Multiple  addresses  can  be  requested with multiple -N flags. |
+
+
+
+##### Examples
+
+Renew IP address
+
+```sh
+sudo dhclient -r eth0
+sudo dhclient eth0
+```
+
+
+
+#### `nmcli`
+
+
+
+#### `ifup` and `ifdown`
+
+Renew IP address
+
+```sh
+sudo ifdown eth0
+sudo ifup eth0
+```
+
+
+
+### Protocols and Discovery
+
+#### nmap
+
+#### netcat
+
+#### traceroute
+
+#### dig
 

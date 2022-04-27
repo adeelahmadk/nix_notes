@@ -16,6 +16,12 @@ Text-based file manager
 
 Fuzzy Finder
 
+#### ripgrep
+
+#### ag - The Silver Searcher
+
+#### watch
+
 
 
 ### Alacritty
@@ -682,6 +688,145 @@ Don't forget to Git ignore `venv` directory!!!
 
 ##### Poet
 
+## Build Tools
+
+### Clang
+
+To compile a C++ program following C++11 standard:
+
+```sh
+clang++ -Wall -std=c++11 test.cc -o test
+```
+
+#### Compiling Static and Dynamic libraries
+
+For both static and dynamic libraries, you first compile the source files individually:
+
+```sh
+# for static lib
+clang -c -o lib_source.o lib_source.c
+# for dynamic lib
+clang -c -o lib_source.o lib_source.c -fPIC
+```
+
+The `-shared` flag tells the linker to create a special file called a shared library. The `-fpic` option converts absolute addresses to relative addresses, which allows for different processes to load the library at different virtual addresses and share memory.
+
+For the static library on Linux, archive all .o files together:
+
+```sh
+ar -rcsv library.a lib_source.o
+```
+
+now, we can statically link it to our program and see the resulting symbols:
+
+```sh
+clang -o prog main.o library.a
+```
+
+
+For the shared library, link with the `-shared` flag:
+
+```sh
+clang -shared -o library.so lib_source.o
+# use a single command for the 2 step build
+clang -shared -fpic -o library.so lib_source.c
+```
+
+
+Now that we have our shared library, let’s dynamically link it into our executable.
+
+```sh
+clang -o prog main.c libhello.so
+```
+
+On Linux, we can simply use `ldd` or `readelf -d` to query an executable for a list of its dynamic libraries. We can then use `strace` to observe the dynamic linker in action on Linux.
+
+When working with shared libraries and external code, three flags are used pretty often:
+
+```sh
+-l <libname to link, no lib prefix or file extension; ex: -lnanomsg to link libnanomsg.so>
+-L <path to search for lib if in non standard directory>
+-I <path to headers for that library, if in non standard directory>
+```
+
+To find specific flags needed for compilation, where dynamic linkage is required, a tool called `pkg-config` is useful. For example:
+
+```sh
+$ pkg-config --libs --cflags libpng12
+-I/usr/include/libpng12  -lpng12
+$ clang program.c `!!`
+```
+
+References:
+- Michael Kerrisk, The Linux Programming Interface
+- [Stackoverflow: Compile a static library in Linux](https://stackoverflow.com/a/32168987/5892622)
+- [Dynamic Libraries set2](https://www.geeksforgeeks.org/working-with-shared-libraries-set-2/)
+- [Static and Dynamic Libraries](https://www.geeksforgeeks.org/static-vs-dynamic-libraries/)
+- [Object files and symbols](http://nickdesaulniers.github.io/blog/2016/08/13/object-files-and-symbols/)
+- [Static and Dynamic Libraries...](http://nickdesaulniers.github.io/blog/2016/11/20/static-and-dynamic-libraries/)
+- [clang - building static libraries](https://mottosso.gitbooks.io/clang/content/building_a_static_library.html)
+
+### GNU `make`
+
+Explaining the makefile literals:
+
+| Literal                 | Description                                                  |
+| ----------------------- | ------------------------------------------------------------ |
+| `target: prerequisites` | the rule head                                                |
+| `$@`                    | means the target                                             |
+| `$^`                    | means all prerequisites                                      |
+| `$<`                    | means just the first prerequisite                            |
+| `$(TARGET)`             | refers to a variable (defined in file, command line, or environment) |
+
+
+
+#### How to compile a static library in Linux?
+
+Makefile:
+
+```makefile
+TARGET = prog
+
+$(TARGET): main.o lib.a
+    gcc $^ -o $@ 
+
+main.o: main.c
+    gcc -c $< -o $@
+
+lib.a: lib1.o lib2.o
+    ar rcs $@ $^
+
+lib1.o: lib1.c lib1.h
+    gcc -c -o $@ $<
+
+lib2.o: lib2.c lib2.h
+    gcc -c -o $@ $<
+
+.PHONY: clean
+
+clean:
+    rm -f *.o *.a $(TARGET)
+```
+
+Explanation of the `ar` command and its options:
+
+`ar` : a Linux tool to create, modify, and extract from archives see the man pages for further information. 
+
+The options used in this case mean:
+
+| Option | Description                                  |
+| ------ | -------------------------------------------- |
+| r      | replace files existing inside the archive    |
+| c      | create a archive if not already existent     |
+| s      | create an object-file index into the archive |
+
+
+
+References:
+
+- Graham-Cumming, John; The GNU Make Book
+- 
+
 ## Verification 
 
 Includes Debug, Profile and Test.
@@ -792,9 +937,15 @@ mysql -u root -p db_name < /backup/db_backup.sql
 
 You should create that database `db_name` before issuing this command.
 
-### Containers
+### Serverless
 
-#### Execute a command in a Detached Containers
+#### Portainer
+
+service delivery platform for containerized applications that can be used to manage Docker, Swarm, Kubernetes and ACI environments.
+
+#### Containers
+
+##### Execute a command in a Detached Containers
 
 Execute a CLI program in a detached container (interactively/detached) by issuing an exec command in the terminal:
 
@@ -1128,6 +1279,8 @@ Refer to [vim-sheet](vim-sheet.md) for details.
 #### Emmet
 
 Plug-in to generate HTML and CSS from a shorthand sysntax.
+
+#### fzf, rg, ag, 
 
 
 

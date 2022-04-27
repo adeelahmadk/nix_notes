@@ -1,4 +1,4 @@
-# Shell Script Cheat Sheet
+#  Shell Script Cheat Sheet
 
 
 
@@ -18,7 +18,7 @@
     11. [Functions](#Functions)
 2. [Shell Environment](#Shell-Environment)
     1. [Aliases](#Aliases)
-3. [Multilingual One-liners](#Multilingual-One-liners)
+3. [Multilingual One-liners](#Multilingual-One-liners-and-Utility-Functions)
     1. [Shell](#Shell)
         1. [Read n lines from anywhere in a file](#Read-n-lines-from-anywhere-in-a-file)
         2. [Generate a random alpha-numeric string](#Generate-a-random-alpha-numeric-string)
@@ -29,6 +29,11 @@
     1. [Clean dangling network interfaces](#Clean-dangling-network-interfaces)
     2. [Background Ping  Job with log rotation](#Background-Ping-Job-with-log-rotation)
     3. [String Trim](#String-Trim)
+    4. [Shell Utils](#Shell-Utils)
+        1. [Extract description for an `apt` package](#Extract-description-for-an-`apt`-package)
+        2. [Search and pull info about a `flatpack` package](#Search-and-pull-info-about-a-`flatpack`-package)
+        3. [Generate markdown doc from Wikipedia article](#Generate-markdown-doc-from-Wikipedia-article)
+        4. [Fuzzy find files and directories](#Fuzzy-find-files-and-directories)
 
 
 
@@ -378,6 +383,39 @@ And via tracing syscalls (output shortened for readability; notice  how temp fil
 $ strace -f -e open,read,write,dup2,unlink,execve bash -c 'cat <<< "TEST"'
 ```
 
+##### Examples
+
+Split a string in tokens and save in multiple variables:
+
+```sh
+$ IFS=- read var1 var2 <<< ABCDE-123456
+$ echo "$var1"
+ABCDE
+$ echo "$var2"
+123456
+
+# Read all tokens into an array
+$ IFS=- read -a list <<< "ABCDE-123456-XT23P"
+$ declare -p list
+declare -a list=([0]="ABCDE" [1]="123456" [2]="XT23P")
+```
+
+you can read each individual character into array elements:
+
+```sh
+$ read -a foo <<<"$(echo "ABCDE-123456" | sed 's/./& /g')"
+```
+
+If there are spaces in the string:
+
+```sh
+$ IFS=$'\v' read -a foo <<<"$(echo "ABCDE 123456" | sed 's/./&\v/g')"
+$ declare -p foo
+declare -a foo='([0]="A" [1]="B" [2]="C" [3]="D" [4]="E" [5]=" " [6]="1" [7]="2" [8]="3" [9]="4" [10]="5" [11]="6")'
+```
+
+
+
 ### Substitution
 
 #### Process Substitution
@@ -405,6 +443,77 @@ How is process substitution implemented, we can find out using the trace as belo
 ```bash
 $ strace -e clone,execve,pipe,dup2 -f bash -c 'cat <(/bin/true) <(/bin/false) <(/bin/echo)'
 ```
+
+
+
+### Variables
+
+variables are defined in syntax as follows, without any spaces:
+
+```sh
+$ NAME='insomniac'
+$ echo $NAME
+insomniac
+```
+
+shell script arrays and their manipulation syntax:
+
+```sh
+$ ARRAYNAME[INDEXNR]=value
+# explicit declaration
+$ declare -a ARRAYNAME
+# Compound Assignment:
+# ARRAYNAME=(value1 value2  .... valueN)
+# or
+# ARRAYNAME=([1]=10 [2]=20 [3]=30)
+$ ARRAYNAME=(ABCDE 123456 XT23P)
+# Print All elements
+$ echo ${ARRAYNAME[@]}
+$ echo ${ARRAYNAME[*]}
+ABCDE 123456 XT23P
+#  Print Selected index element
+$ INDEX=1; echo ${ARRAYNAME[INDEX]}
+123456
+# print elements from a particular index
+# echo ${ARRAYNAME[WHICH_ELEMENT]:STARTING_INDEX}
+echo ${ARRAYNAME[1]:2}
+3456
+# print elements in range
+# echo ${ARRAYNAME[WHICH_ELEMENT]:STARTING_INDEX:COUNT_ELEMENT}
+$ echo ${ARRAYNAME[@]:1:2}
+123456 XT23P
+$ echo ${ARRAYNAME[2]:1:3}
+T23
+# count the length of a particular element in Array.
+# Use #(hash) to print length of particular element
+$ echo ${#ARRAYNAME[0]}        
+$ echo ${#ARRAYNAME}
+5
+# count the length of an Array.
+$ echo ${#ARRAYNAME[@]}
+$ echo ${#ARRAYNAME[*]}
+3
+
+# Loop over array elements
+for item in ${ARRAYNAME[@]}; do
+	echo "current item: $item"
+done
+
+# Search in Array
+$ echo ${ARRAYNAME[@]/*[aA]*/}
+
+# Search & Replace in Array
+# //Search_using_Regular_Expression/Replace : Search & Replace
+$ echo ${ARRAYNAME[@]//A/a}
+aBCDE 123456 XT23P
+
+# delete index-1 element
+$ unset ARRAYNAME[1]
+$ echo ${ARRAYNAME[@]}
+ABCDE XT23P
+```
+
+
 
 ### Command Line Arguments
 
@@ -832,7 +941,7 @@ alias pingjob='rotlog $HOME/.var/log/pinglog && for (( ; ; )); do echo; echo "St
 
 
 
-## Multilingual One-liners
+## Multilingual One-liners and Utility Functions
 
 ### Shell
 
@@ -889,8 +998,6 @@ head -60 /dev/urandom | tr -dc 'a-z0-9' | fold -w 3 | head -n 1
 
 
 #### Generate a random password
-
-
 
 ```sh
 # using openssl
@@ -1066,5 +1173,155 @@ using `xargs`
 ```shell
 # Remove the spaces from the string data using `xargs`
 echo " Bash Scripting Language " | xargs
+```
+
+
+
+### Shell Utils
+
+#### Extract description for an `apt` package
+
+```sh
+###############################################
+# Search and print info about an apt package
+#
+# Globals:
+#   None
+# Arguments:
+#   A string keyword to search
+# Returns:
+#   None
+###############################################
+function aptdesc() {
+    [ "$#" -ne 1 ] && echo "Usage: aptdesc PACKAGE" >&2 && return 2
+    __aptcache=`which apt-cache`
+    __awk=`which awk`
+    # Match only the text between two Description lines
+    $__aptcache show "$1" | \
+      $__awk 'BEGIN {p=0}; /(Description.*:)/ {p=1 ; next}; /Description-md5/ {p=0 ; next}; p {print}'
+}
+```
+
+Or just select everything including the lines containing two tokens:
+
+```sh
+###############################################
+# Search and print info about an apt package
+#
+# Globals:
+#   None
+# Arguments:
+#   A string keyword to search
+# Returns:
+#   None
+###############################################
+function aptdesc() {
+    [ "$#" -ne 1 ] && echo "Usage: aptdesc PACKAGE" >&2 && return 2
+    __aptcache=`which apt-cache`
+    __awk=`which awk`
+    __grep=`which grep`
+    # Match the text including two Description lines
+    # then just select all except last Description line
+    $__aptcache show "$1" | \
+      $__awk '/Description.*:/, /Description-md5/' | \
+      $__grep -v 'Description-md5'
+}
+```
+
+
+
+#### Search and pull info about a `flatpack` package
+
+```sh
+###############################################
+# Search and print info about a remote flatpak
+# application or runtime.
+# Globals:
+#   None
+# Arguments:
+#   A string keyword to search
+# Returns:
+#   None
+###############################################
+function fpfind() {
+    [ "$#" -eq 0 ] && echo "Usage: fpfind APP" >&2 && return 2
+    __awk=`which awk`
+    __grep=`which grep`
+    __fpack=`which flatpak`
+    echo "Searching for the app flatpak remotes..."
+    # Search for a remote package matching the keyword.
+    RES=$($__flatpak search "$1" | $__grep "$1" | $__awk -F'\t' '{print $NF "-" $3;}')
+    IFS=- read REMOTE REF <<< $RES
+    # Lookup reference in a remote repo.
+    echo "Looking up REF:${REF} in REMOTE:${REMOTE}..."
+    $__fpack remote-info $REMOTE $REF || echo "flatpak remote-info failed!" >&2
+}
+```
+
+
+
+#### Generate markdown doc from Wikipedia article
+
+```sh
+###############################################
+# Generate markdown doc from Wikipedia article
+# Globals:
+#   None
+# Arguments:
+#   URL to the article
+#   [FILENAME]
+# Returns:
+#   None
+###############################################
+function wp2md() {
+    [ "$#" -lt 1 ] && echo "usage: wp2md URI [output_file]" >&2; return 1;
+    __awk=`which awk` || echo "missing dependency: awk" >&2; return 1;
+    __curl=`which curl` || echo "missing dependency: curl" >&2; return 1;
+    __hxnorm=`which hxnormalize` || echo "missing dependency: hxnormalize" >&2; return 1;
+    __hxrem=`which hxremove` || echo "missing dependency: hxremove" >&2; return 1;
+    __pandoc=`which pandoc` || echo "missing dependency: pandoc" >&2; return 1;
+    # prepare url for the printable version
+    local url=`echo "${1}" | $__awk -F/ '{print $1 "//" $3 "/w/index.php?title=" $NF "&printable=yes";}'`
+    local outfile=
+    [ -n "$2" ] && outfile="${2}" || outfile="$(echo $1 | $__awk -F/ '{print $NF;}').md"
+    echo "Pulling ${url}"
+    $__curl -sS "${url}" | $__hxnorm -x | $__hxrem '.noprint' | $__pandoc -f html -t markdown -o "${outfile}"
+}
+```
+
+
+
+#### Fuzzy find files and directories
+
+Following snippets require `fzf` as a dependency:
+
+```sh
+function fzz() {
+    # fuzzy find files in dir tree received.
+    find "$1" -type f 2> /dev/null | fzf
+}
+
+function fzd() {
+    # fuzzy find dirs in dir tree received.
+    find "$1" -type d 2> /dev/null | fzf
+}
+```
+
+
+
+#### Read markdown files in terminal
+
+```sh
+function readmd() {
+# Read a markdown file in terminal.
+# Dependencies: pandoc, lynx
+    __pandoc=`which pandoc`
+    __lynx=`which lynx`
+    if [[ -z "$__pandoc" ]] || [[ -z "$__lynx" ]]; then
+        echo "Install dependencies: pandoc and lynx."
+        return 1
+    fi
+    $__pandoc $1 | $__lynx -stdin
+}
 ```
 

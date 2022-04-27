@@ -216,7 +216,12 @@ docc run --rm -it --name myAlpine alpine:latest /bin/sh
 # examples:
 docker container run --rm -it --name ubuntu.test ubuntu:latest /bin/bash
 docker container run --rm -it --name test alpine:latest /bin/sh -c 'echo $HOME'
+
+# stop and hence remove the container
+docker container stop test
 ```
+
+
 
 #### List dangling images
 
@@ -239,7 +244,54 @@ docker volume prune
 
 Contents of this section are mostly borrowed from docker docs topics [Dockerfile reference](https://docs.docker.com/engine/reference/builder/) and [Best practices for writing Dockerfiles](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/). Hence, refer to these documents for a detailed explanation.
 
-### Syntax
+### Format
+
+Here is the format of the `Dockerfile`:
+
+```dockerfile
+# Comment
+INSTRUCTION arguments
+```
+
+The instruction is not case-sensitive. However, convention is for them to be UPPERCASE to distinguish them from arguments easily.
+
+Docker runs instructions in a `Dockerfile` in sequential order. A `Dockerfile` **must begin with a `FROM` instruction**. This may be after [parser directives](https://docs.docker.com/engine/reference/builder/#parser-directives), [comments](https://docs.docker.com/engine/reference/builder/#format), and globally scoped [ARGs](https://docs.docker.com/engine/reference/builder/#arg). The `FROM` instruction specifies the [*Parent Image*](https://docs.docker.com/glossary/#parent-image) from which you are building. `FROM` may only be preceded by one or more `ARG` instructions, which declare arguments that are used in `FROM` lines in the `Dockerfile`.
+
+Comment lines are removed before the Dockerfile instructions are executed, which means that the comment in the following example is not handled by the shell executing the `echo` command, and both examples below are equivalent:
+
+```dockerfile
+RUN echo hello \
+	# comment
+	world
+
+RUN echo hello \
+world
+```
+
+Line continuation characters are not supported in comments.
+
+Environment variables (declared with [the `ENV` statement](https://docs.docker.com/engine/reference/builder/#env)) can also be used in certain instructions as variables to be interpreted by the `Dockerfile`. Environment variables are notated in the `Dockerfile` either with `$variable_name` or `${variable_name}`. They are treated equivalently and the brace syntax is typically used to address issues with variable names with no whitespace, like `${foo}_bar`.
+
+The `${variable_name}` syntax also supports a few of the standard `bash` modifiers as specified below:
+
+- `${variable:-word}` indicates that if `variable` is set then the result will be that value. If `variable` is not set then `word` will be the result.
+- `${variable:+word}` indicates that if `variable` is set then `word` will be the result, otherwise the result is the empty string.
+
+In all cases, `word` can be any string, including additional environment variables.
+
+Environment variables are supported by the following list of instructions in the `Dockerfile`:
+
+- `ADD`
+- `COPY`
+- `ENV`
+- `EXPOSE`
+- `FROM`
+- `LABEL`
+- `STOPSIGNAL`
+- `USER`
+- `VOLUME`
+- `WORKDIR`
+- `ONBUILD` (when combined with one of the supported instructions above)
 
 
 
@@ -247,7 +299,27 @@ Contents of this section are mostly borrowed from docker docs topics [Dockerfile
 
 ### `.dockerignore` file
 
+Before the docker CLI sends the context to the docker daemon, it looks for a file named `.dockerignore` in the root directory of the context. If this file exists, the CLI modifies the context to exclude files and directories that match patterns in it.
 
+The CLI interprets the `.dockerignore` file as a newline-separated list of patterns similar to the file globs of Unix shells.
+
+Here is an example `.dockerignore` file:
+
+```gitignore
+# comment
+*/temp*
+*/*/temp*
+temp?
+```
+
+This file causes the following build behavior:
+
+| Rule        | Behavior                                                     |
+| :---------- | :----------------------------------------------------------- |
+| `# comment` | Ignored.                                                     |
+| `*/temp*`   | Exclude files and directories whose names start with `temp` in any immediate subdirectory of the root.  For example, the plain file `/somedir/temporary.txt` is excluded, as is the directory `/somedir/temp`. |
+| `*/*/temp*` | Exclude files and directories starting with `temp` from any subdirectory that is two levels below the root. For example, `/somedir/subdir/temporary.txt` is excluded. |
+| `temp?`     | Exclude files and directories in the root directory whose names are a one-character extension of `temp`.  For example, `/tempa` and `/tempb` are excluded. |
 
 [< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Practices)
 
@@ -267,8 +339,9 @@ The `ARG` instruction defines a variable that users can pass at build-time to th
 
 ```dockerfile
 FROM busybox
+# default value for USER
 ARG user
-USER ${USER:-user}
+ENV USER ${user:-someuser}
 USER $USER
 # ...
 ```
@@ -277,7 +350,7 @@ USER $USER
 docker build --build-arg user=some_user .
 ```
 
-An `ARG` instruction goes out of scope at the end of the build stage where it was defined. To use an arg in multiple stages, each stage must include the `ARG` instruction. An `ARG` instruction goes out of scope at the end of the build stage where it was defined. To use an arg in **multiple stages**, each stage must include the `ARG` instruction.
+An `ARG` instruction goes out of scope at the end of the build stage where it was defined. To use an `ARG` in multiple stages, each stage must include the `ARG` instruction. An `ARG` instruction goes out of scope at the end of the build stage where it was defined. To use an `ARG` in **multiple stages**, each stage must include the `ARG` instruction.
 
 ```dockerfile
 FROM ubuntu
@@ -350,7 +423,85 @@ The output of the final `pwd` command in this `Dockerfile` would be `/path/$DIRN
 
 #### `CMD`
 
+Docker `ENTRYPOINT` and `CMD` can have two forms: **Shell form** and **Exec form**. The syntax for any command in shell form is: 
+
+```
+<instruction> <command>
+```
+
+ The syntax for instructions in exec form is: 
+
+```
+<instruction> ["executable", "parameter"]
+```
+
+ You can write Docker `CMD`/`ENTRYPOINT` instructions in both forms: 
+
+```dockerfile
+CMD echo "Hello World" #(shell form)
+CMD ["echo", "Hello World"] #(exec form)
+ENTRYPOINT echo "Hello World #(shell form)
+ENTRYPOINT ["echo", "Hello World"] #(exec form)
+```
+
+For a detailed explanation, check section: [Using environment variables in `CMD` and `ENTRYPOINT`](#Using-environment-variables-in-`CMD`-and-`ENTRYPOINT`)
+
+Docker `CMD` defines the default executable of a docker image. You can run this image as the base of a container without adding command-line arguments. In that case, the container runs the process specified by the `CMD` command.
+
+The `CMD` instruction is only utilized if there is no argument added to the run command when starting a container. Therefore, if you add an argument to the command, you override the `CMD`.
+
+For example
+
+```sh
+mkdir MyDockerImage && cd MyDockerImage
+# write the Dockerfile
+cat << EOF > Dockerfile
+> From ubuntu
+> LABEL maintainer="adeel"
+> RUN apt update
+> CMD ["echo", "Hello World!"]
+> EOF
+# build the image
+docker build -t "hello_world" .
+# run the image
+docker run --rm hello_world
+Hello World!
+# override the default CMD
+docker run --rm hello_world hostname
+35fa59939a14
+```
+
+Since there is no command-line argument, the container will run the default `CMD` instruction and display the **`Hello World`** message. However, if you add an argument when starting a container, it overrides the `CMD` instruction.
+
 #### `ENTRYPOINT`
+
+`ENTRYPOINT` is the other instruction used to configure how the container will run.  Just like with `CMD`, you need to specify a command and parameters. **What is the difference between `CMD` and `ENTRYPOINT`?** You cannot override the `ENTRYPOINT` instruction by adding command-line parameters to the **`docker run`** command. By opting for this instruction, you imply that the container is specifically built for such use.
+
+For example
+
+```sh
+# write the Dockerfile
+cat << EOF > Dockerfile
+> From ubuntu
+> LABEL maintainer="adeel"
+> RUN apt update
+> ENTRYPOINT ["echo", "Hello World!"]
+> EOF
+# build the image
+docker build -t "hello_world" .
+# run the image
+docker run --rm hello_world
+Hello World!
+# try to override the ENTRYPOINT
+docker run --rm hello_world hostname
+Hello World! hostname
+```
+
+
+
+Reference: [Docker CMD vs. Entrypoint Commands: What's the Difference?](https://phoenixnap.com/kb/docker-cmd-vs-entrypoint)
+
+
 
 #### `HEALTHCHECK`
 
@@ -361,6 +512,46 @@ The output of the final `pwd` command in this `Dockerfile` would be `/path/$DIRN
 [< Prev](#Dockerfile) [Top](#Docker-Command-Reference) [Next >](#Talking-to-the-outside-world)
 
 ### Practices
+
+#### Using environment variables in `CMD` and `ENTRYPOINT`
+
+When you use an execution list, Docker will interpret the given command literally (without variable expansion).
+
+If you want to expand variables, you need to use a shell in your `CMD`. You can replace your `ENTRYPOINT` and `CMD` to use only this:
+
+```
+CMD ["sh", "-c", "ng serve --host ${HOST} --port ${PORT} --disable-host-check"]
+```
+
+For example
+
+```dockerfile
+FROM ruby:2.7-alpine
+
+LABEL maintainer="Adeel Ahmad <adeeldev@gmail.com>"
+
+ARG VERSION
+ENV BUILD_VERSION=${VERSION:-0.8.2}
+
+RUN set -xe \
+    && apk add --no-cache \
+        libstdc++ \
+        sqlite-libs \
+    && apk add --no-cache --virtual .build-deps \
+        build-base \
+        sqlite-dev \
+    && gem install mailcatcher -v ${BUILD_VERSION} --no-document \
+    && apk del .build-deps
+
+ENV HTTPPATH="/"
+
+# smtp port & webserver port
+EXPOSE 1025 1080
+
+ENTRYPOINT ["sh", "-c", "mailcatcher --no-quit --foreground --ip=0.0.0.0 --http-path ${HTTPPATH}"]
+```
+
+Further reading: [Dockerfile `CMD` doesn't understand `ENV` variables [#5509\]](https://github.com/moby/moby/issues/5509)
 
 #### Set shell aliases or functions for Docker containers
 
@@ -482,6 +673,14 @@ This will reveal AP logs of incoming requests and respective  responses.
 [< Prev](#Talking-to-the-outside-world) [Top ](#Docker-Command-Reference) [Next >](#Complementary-Topics)
 
 ## Docker-Compose
+
+```sh
+docker-compose up -d
+docker-compose down
+
+docker-compose up --build -d
+
+```
 
 
 

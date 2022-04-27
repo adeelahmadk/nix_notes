@@ -7,10 +7,95 @@
 3. [System & Network](#System-&-Network)
 4. [Distributed, Web & Data intensive](#Distributed-Web-&-Data-intensive)
 5. [Multimedia Processing](#Multimedia-Processing)
+    1. [ffmpeg:_Audio_&_Video_Codecs](#ffmpeg)
+    2. [gstreamer](#gstreamer)
+    3. [youtube-dl: Download videos from web](#youtube-dl)
+
 6. [Running applications](#Running-applications)
 7. [Virtual Machine Management](#Virtual-Machine-Management)
     1. [KVM](#KVM)
     2. [VBox](#VBox)
+
+
+
+## Terminal Applications
+
+### Alacritty
+
+#### Configuration
+
+```yaml
+# Import additional configuration files (e.g. color schemes etc.)
+import:
+  - ~/.config/alacritty/pencil_dark.yaml
+
+#env:
+  # TERM variable
+  #
+  # This value sets the `$TERM` environment variable for
+  # each instance of Alacritty. It defaults to `alacritty` if it is
+  # available, otherwise `xterm-256color` is used.
+  #TERM: alacritty
+
+# monospaced fonts with ligatures
+#  - SauceCodePro Nerd Font
+#  - Fira Code
+#  - FiraCode Nerd Font
+font:
+  normal:
+    family: "FiraCode Nerd Font"
+    style: Light
+  bold:
+    family: "FiraCode Nerd Font"
+    style: Bold
+  italic:
+    family: "FiraCode Nerd Font"
+    style: Italic
+  bold_italic:
+    family: "FiraCode Nerd Font"
+    style: Bold Italic
+  # Point size
+  size: 9.0
+  offset:
+    x: 0
+    y: 0
+  glyph_offset:
+    x: 0
+    y: 0
+
+window:
+  padding:
+    x: 2
+    y: 2
+  opacity: 0.93
+
+scrolling:
+  # Maximum number of lines in the scrollback buffer.
+  # Specifying '0' will disable scrolling.
+  history: 10000
+  # Number of lines the viewport will move for every line scrolled when
+  # scrollback is enabled (history > 0).
+  multiplier: 10
+
+# If `true`, bold text is drawn using the bright color variants.
+draw_bold_text_with_bright_colors: true
+
+selection:
+  semantic_escape_chars: ',│`|:"'' ()[]{}<>'
+  save_to_clipboard: true
+
+live_config_reload: true
+
+key_bindings:
+  - { key: V, mods: Control|Shift, action: Paste }
+  - { key: C, mods: Control|Shift, action: Copy }
+  - { key: Key0, mods: Control, action: ResetFontSize }
+  - { key: Equals, mods: Control, action: IncreaseFontSize }
+  - { key: Plus, mods: Control, action: IncreaseFontSize }
+  - { key: Minus, mods: Control, action: DecreaseFontSize }
+  - { key: N, mods: Control, action: SpawnNewInstance }
+
+```
 
 
 
@@ -344,7 +429,11 @@ curl wttr.in/:help
 
 ## Multimedia Processing
 
-### `ffmpeg`: Audio & Video Codecs
+### `ffmpeg`
+
+Tools for transcoding, streaming and playing of multimedia files
+
+`FFmpeg` is the leading multimedia framework, able to decode, encode, transcode, mux, demux, stream, filter and play pretty much anything that humans and machines have created.
 
 #### Embed subtitles
 You can burn text subtitles (hardsubs) with one of two filters: `subtitles` or `ass`.
@@ -390,7 +479,7 @@ ffmpeg -i myVideo.avi myvideo.ogg
 
 
 
-### gstreamer
+### `gstreamer`
 
 #### Test installation
 
@@ -448,7 +537,7 @@ sudo apt-get install gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreame
 -  **gst-plugins-ugly** – a set of good-quality plug-ins that might pose distribution problems
 -  **gst-plugins-bad** – a set of plug-ins that need more quality, testing or documentation 
 
-### Check installed plugins
+#### Check installed plugins
 
 Inspect installed plugins as follows:
 
@@ -456,7 +545,7 @@ Inspect installed plugins as follows:
 gst-inspect-1.0 --plugin | grep "mp4\|x264\|pulsesrc"
 ```
 
-#### Launch first pipeline
+##### Launch first pipeline
 
 Type in command line simple command to check that everything works as supposed:
 
@@ -470,7 +559,7 @@ gst-launch-1.0 videotestsrc ! autovideosink
 
 In case you installing Gstreamer on remote PC without any display, use **fakesink** instead of **autovideosink**.
 
-### youtube-dl: Download videos from web
+### `youtube-dl`
 
 *youtube-dl* is a command-line program to download videos from [YouTube.com](https://www.youtube.com/) and a few [more sites](https://ytdl-org.github.io/youtube-dl/supportedsites.html). It requires the [Python interpreter](http://www.python.org/) (2.6, 2.7, or 3.2+), and it is not platform specific.
 
@@ -544,6 +633,11 @@ youtube-dl -f18 --yes-playlist -o '~/Videos/stats/%(playlist_index)s-%(title)s[%
 ```
 
 
+
+#### References
+
+- [Youtube-dl Tutorial With Examples For Beginners](https://ostechnix.com/youtube-dl-tutorial-with-examples-for-beginners/)
+- 
 
 ### Speech Synthesis
 
